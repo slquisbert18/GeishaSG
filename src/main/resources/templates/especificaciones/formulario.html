@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Especificación Fotográfica</title>
+</head>
+<body>
+<section layout:fragment="contenido">
+    <h1 class="page-title" th:text="${tituloformulario}">
+        Nueva especificación
+    </h1>
+
+    <div class="form-card">
+        <form th:action="@{/especificaciones/guardar}" th:object="${especificacion}" method="post">
+
+            <input type="hidden" th:field="*{id}">
+
+            <!-- datos principales -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    Datos principales
+                </h3>
+
+                <div class="form-grid">
+                    <!-- ancho -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Ancho (cm)
+                        </label>
+
+                        <input type="number"
+                               step="0.01"
+                               min="0.01"
+                               class="form-control"
+                               th:field="*{ancho}"
+                               placeholder="Ej: 3.50">
+
+                        <div class="field-error"
+                             th:if="${#fields.hasErrors('ancho')}"
+                             th:errors="*{ancho}">
+                        </div>
+                    </div>
+
+                    <!-- alto -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Alto (cm)
+                        </label>
+
+                        <input type="number"
+                               step="0.01"
+                               min="0.01"
+                               class="form-control"
+                               th:field="*{alto}"
+                               placeholder="Ej: 4.50">
+
+                        <div class="field-error"
+                             th:if="${#fields.hasErrors('alto')}"
+                             th:errors="*{alto}">
+                        </div>
+                    </div>
+
+                    <!-- Cantidad-->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Cantidad
+                        </label>
+
+                        <input type="number"
+                               min="1"
+                               class="form-control"
+                               th:field="*{cantidad}"
+                               placeholder="Ej: 4">
+
+                        <div class="field-error"
+                             th:if="${#fields.hasErrors('cantidad')}"
+                             th:errors="*{cantidad}">
+                        </div>
+                    </div>
+
+                    <!-- Color de fondo-->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Color de fondo
+                        </label>
+
+                        <input type="text"
+                               class="form-control"
+                               th:field="*{colorFondo}"
+                               placeholder="Ej: Blanco">
+
+                        <div class="field-error"
+                             th:if="${#fields.hasErrors('colorFondo')}"
+                             th:errors="*{colorFondo}">
+                        </div>
+                    </div>
+
+                    <!-- Tipo de papel-->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Tipo de papel
+                        </label>
+
+                        <input type="text"
+                               class="form-control"
+                               th:field="*{tipoPapel}"
+                               placeholder="Ej: Brillo/Mate/Adhesivo">
+
+                        <div class="field-error"
+                             th:if="${#fields.hasErrors('tipoPapel')}"
+                             th:errors="*{tipoPapel}">
+                        </div>
+                    </div>
+
+                    <!-- Tramite-->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Trámite
+                        </label>
+
+                        <input class="form-control"
+                               th:value="${especificacion.tramite.nombre}"
+                               readonly>
+
+                        <input type="hidden" th:field="*{tramite.id}">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- datos avanzados -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    Datos avanzados
+                </h3>
+
+                <div class="form-grid">
+<!--                    codigo_rgb VARCHAR(20),-->
+<!--                    codigo_hex VARCHAR(10),-->
+<!--                    resolucion SMALLINT,-->
+<!--                    margen NUMERIC(5,2),-->
+<!--                    observaciones TEXT,-->
+
+                    <!-- CODIGO RGB-->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Codigo RGB
+                        </label>
+
+                        <input type="text"
+                               class="form-control"
+                               th:field="*{codigoRgb}"
+                               placeholder="255,255,255">
+
+                        <div class="field-error"
+                             th:if="${#fields.hasErrors('codigoRgb')}"
+                             th:errors="*{codigoRgb}">
+                        </div>
+                    </div>
+
+                    <!-- CODIGO HEX-->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Codigo HEX
+                        </label>
+
+                        <input type="text"
+                               class="form-control"
+                               th:field="*{codigoHex}"
+                               placeholder="#FFFFFF">
+
+                        <div class="field-error"
+                             th:if="${#fields.hasErrors('codigoHex')}"
+                             th:errors="*{codigoHex}">
+                        </div>
+                    </div>
+
+                    <!-- RESOLUCION DPI -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Resolución (DPI)
+                        </label>
+
+                        <input type="number"
+                               min="1"
+                               class="form-control"
+                               th:field="*{resolucion}"
+                               placeholder="Ej: 300">
+
+                        <div class="field-error"
+                             th:if="${#fields.hasErrors('resolucion')}"
+                             th:errors="*{resolucion}">
+                        </div>
+                    </div>
+
+                    <!-- MARGEN -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Margen (cm)
+                        </label>
+
+                        <input type="number"
+                               step="0.01"
+                               min="0"
+                               class="form-control"
+                               th:field="*{margen}"
+                               placeholder="Ej: 0.50">
+
+                        <div class="field-error"
+                             th:if="${#fields.hasErrors('margen')}"
+                             th:errors="*{margen}">
+                        </div>
+                    </div>
+
+                    <!-- OBERVACIONES -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Obervaciones
+                        </label>
+
+                        <textarea
+                               rows="4"
+                               class="form-control"
+                               th:field="*{observaciones}"
+                               placeholder="Observaciones adicionales">
+                        </textarea>
+
+                        <div class="field-error"
+                             th:if="${#fields.hasErrors('observaciones')}"
+                             th:errors="*{observaciones}">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a th:href="@{/tramites}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i>
+                    Cancelar
+                </a>
+                <button type="submit"
+                        class="btn btn-primary">
+                    <i class="bi bi-save"></i>
+                    Guardar
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+</section>
+</body>
+</html>

@@ -1,0 +1,683 @@
+/*VARIABLES DEL SISTEMA*/
+:root{
+
+    --color-sidebar:#111111; /* negro casi puro*/
+    --color-topbar:#2F241D; /* marron cafe muy oscuro */
+    --color-brown:#524035; /* marron cafe */
+    --color-primary:#C62828; /* rojo vibrante */
+    --color-background:#F5F5F5; /* blanco humo */
+    --color-white:#FFFFFF; /* blanco */
+    --color-text:#333333; /* gris oscuro */
+    --color-hover:#1E1E1E; /* gris oscuro profundo */
+
+    --sidebar-width:260px;
+    --sidebar-collapse-width:75px;
+
+}
+
+/* CONFIGURACIÓN GENERAL */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Inter',sans-serif;
+    background:var(--color-background);
+    color:var(--color-text);
+}
+
+/* LAYOUT PRINCIPAL (parte central entre la cabecera y el footer */
+
+.layout{
+    display:flex;
+    min-height:100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    width:var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    background:var(--color-sidebar);
+    color:white;
+
+    transition:width .30s ease;
+}
+
+/* Logo del estudio */
+
+.logo{
+    height:70px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    gap: 10px;
+}
+
+.logo-red{
+    color:var(--color-primary);
+
+    font-size:26px;
+}
+
+.logo-full{
+    color:white;
+
+    font-size:28px;
+
+    font-weight:700;
+
+    letter-spacing:3px;
+}
+
+.logo-short{
+    display:none;
+
+    color:white;
+
+    font-size:28px;
+
+    font-weight:700;
+}
+
+/* MENÚ */
+
+.sidebar ul{
+    list-style:none;
+}
+
+.sidebar li{
+    position: relative;
+    padding:16px 25px;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    display:flex;
+    align-items:center;
+
+    gap:15px;
+}
+
+/* se dibuja una barra roja al lado izquierdo del menú. */
+.sidebar li.active{
+    background:#1A1A1A;
+}
+
+.sidebar li.active::before{
+    content:"";
+
+    position:absolute;
+
+    left:0;
+    top:0;
+
+    width:5px;
+    height:100%;
+
+    background:var(--color-primary);
+}
+
+.sidebar li:hover{
+    background:var(--color-hover);
+}
+
+.sidebar i{
+    font-size:20px;
+}
+
+/* ENLACES DEL MENÚ */
+
+.sidebar a{
+    text-decoration:none;
+    color:white;
+
+    display:flex;
+    align-items:center;
+    gap:15px;
+    width:100%;
+}
+
+/*
+SIDEBAR COLAPSABLE
+Cuando la clase "collapsed" esté presente en .sidebar,
+el menú se reducirá mostrando únicamente los iconos.
+*/
+
+.sidebar.collapsed{
+    width:var(--sidebar-collapse-width);
+    min-width: var(--sidebar-collapse-width);
+}
+
+/* Oculta el texto del logo */
+.sidebar.collapsed .logo-full{
+    display:none;
+}
+
+.sidebar.collapsed .logo-short{
+    display:block;
+}
+
+/* Centra el logo */
+.sidebar.collapsed .logo{
+    justify-content:center;
+}
+
+/* Oculta el texto de las opciones */
+.sidebar.collapsed span{
+    display:none;
+}
+
+/* Centra los iconos */
+.sidebar.collapsed li{
+    justify-content:center;
+    padding:18px 0;
+}
+
+/* Los enlaces también se centran */
+.sidebar.collapsed a{
+    justify-content:center;
+}
+
+/* CONTENIDO PRINCIPAL   */
+.main{
+    flex:1;
+
+    display:flex;
+    flex-direction:column;
+}
+
+/* BARRA SUPERIOR */
+
+.topbar{
+    height:70px;
+
+    background:var(--color-topbar);
+
+    color:white;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:0 30px;
+
+    border-bottom:3px solid var(--color-primary);
+}
+
+.topbar button{
+    border:none;
+
+    background:none;
+
+    color:white;
+
+    font-size:24px;
+
+    cursor:pointer;
+}
+
+.topbar-right{
+    display:flex;
+
+    align-items:center;
+
+    gap:25px;
+}
+
+/* CONTENIDO */
+
+.content{
+    flex:1;
+    padding:30px;
+}
+
+/* TABLAS */
+
+.table-container{
+    background:white;
+
+    border-radius:10px;
+
+    overflow:hidden;
+
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+thead{
+    background:var(--color-topbar);
+    color:white;
+}
+
+th{
+    padding:16px;
+    text-align:left;
+    font-weight:600;
+}
+
+td{
+    padding:15px;
+    border-bottom:1px solid #EEEEEE;
+}
+
+tbody tr{
+    transition:.20s;
+}
+
+tbody tr:hover{
+    background:#FAFAFA;
+}
+
+.empty-message{
+    text-align:center;
+    padding:30px;
+    color:#777;
+    font-size:16px;
+}
+
+.empty-message i{
+    font-size:22px;
+    margin-right:8px;
+    color:var(--color-primary);
+}
+
+/* TÍTULOS */
+
+.page-title{
+    font-size:30px;
+    font-weight:700;
+    margin-bottom:25px;
+    position:relative;
+}
+
+.page-title::after{
+    content:"";
+    width:70px;
+    height:4px;
+    background:var(--color-primary);
+    position:absolute;
+    left:0;
+    bottom:-8px;
+    border-radius:10px;
+}
+
+/* TOOLBAR */
+
+.toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+    gap:20px;
+    flex-wrap:wrap;
+}
+
+.toolbar-left,
+.toolbar-right{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+/* BOTONES */
+
+.btn{
+    border:none;
+    border-radius:8px;
+    padding:10px 18px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.20s;
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+/* Botón principal */
+.btn-primary{
+    background:var(--color-topbar);
+    color:white;
+}
+
+.btn-primary:hover{
+    background:#47362C;
+}
+
+/* Botón secundario */
+.btn-secondary{
+    background:#000000;
+    color: var(--color-text);
+    border:1px solid #DADADA;
+}
+
+.btn-secondary:hover{
+    background:#252525;
+}
+
+/* BUSCADOR */
+
+.search-box{
+    padding:10px 15px;
+    border-radius:8px;
+    border:1px solid #D0D0D0;
+    width:260px;
+    outline:none;
+    transition:.20s;
+}
+
+.search-box:focus{
+    border-color:var(--color-primary);
+}
+
+.search-form{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.btn{
+    color: white;
+    border:none;
+    border-radius:8px;
+    padding:10px 18px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.20s;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    text-decoration:none;
+}
+
+.btn:hover{
+    text-decoration:none;
+}
+
+/* FORMULARIOS */
+.form-card{
+    background:white;
+    border-radius:10px;
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+    padding:30px;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+}
+
+.form-section{
+    margin-bottom: 12px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.form-section-title{
+    margin-bottom: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #444;
+}
+
+.form-group.full{
+    grid-column:1 / -1;
+}
+
+.form-label{
+    font-weight:600;
+    margin-bottom:8px;
+}
+
+.form-control{
+    padding:12px 14px;
+    border:1px solid #DADADA;
+    border-radius:8px;
+    font-size:15px;
+    transition:.20s;
+    resize:none;
+}
+
+.form-control:focus{
+    outline:none;
+    border-color:var(--color-primary);
+    box-shadow:0 0 0 3px rgba(198,40,40,.15);
+}
+
+/* mensaje de error en los campos de texto del form */
+.field-error{
+    margin-top:6px;
+    color:var(--color-primary);
+    font-size:13px;
+    font-weight:600;
+}
+
+/* acciones del formulario */
+.form-actions {
+    margin-top: 35px;
+    padding-top: 25px;
+    border-top: 1px solid #ECECEC;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.table-actions{
+    display:flex;
+    gap:10px;
+}
+
+.btn-danger{
+    background:var(--color-primary);
+    color:white;
+}
+
+.btn-danger:hover{
+    background:#A32020;
+}
+
+/* MODAL REUTILIZABLE */
+
+/* Fondo oscuro que cubre toda la pantalla */
+.modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+/* Cuando agreguemos esta clase el modal aparecerá */
+.modal-overlay.show{
+    display:flex;
+}
+
+/* Tarjeta principal */
+.modal-card{
+    width:420px;
+    max-width:90%;
+    background:white;
+    border-radius:14px;
+    padding:35px;
+    text-align:center;
+    box-shadow:0 10px 30px rgba(0,0,0,.20);
+    animation:modalShow .25s ease;
+}
+
+/* Icono */
+.modal-icon{
+    font-size:55px;
+    margin-bottom:20px;
+}
+
+/* Título */
+.modal-card h2{
+    margin-bottom:15px;
+}
+
+/* Mensaje */
+.modal-card p{
+    color:#666;
+    line-height:1.6;
+}
+
+/* Botones */
+.modal-buttons{
+    margin-top:30px;
+    display:flex;
+    justify-content:center;
+    gap:15px;
+}
+
+/* MODAL ESPECIFICACION FOTOGRAFICA */
+.modal-foto{
+    width: 700px;
+    max-width: 95%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-foto-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    border-bottom: 2px solid var(--color-primary);
+    padding-bottom: 10px;
+}
+
+.modal-foto-body{
+    overflow-y: auto;
+    padding-right: 8px;
+    flex: 1;
+}
+
+.modal-titulos{
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-foto-header p{
+    margin-top: 5px;
+    color: #777;
+}
+
+.btn-icon{
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #666;
+    transition: .2s;
+}
+
+.btn-icon:hover {
+    color: #000;
+}
+
+.btn-foto{
+    background: var(--color-brown);
+    color: white;
+    border: none;
+}
+
+.btn-foto:hover{
+    background: var(--color-topbar);
+}
+
+.detalle-grid{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.detalle-item{
+    display: flex;
+    align-items:center;
+    margin-bottom:8px;
+}
+
+.detalle-item.full{
+    grid-column: 1/-1;
+}
+
+.detalle-label{
+    font-size: .85rem;
+    color: #555;
+    margin-bottom: 4px;
+    width: 140px;
+    font-weighth: 600;
+}
+
+.foto-empty-image{
+    width: 220px;
+    display: block;
+    margin: 25px auto;
+}
+
+#fotoVacio{
+    text-align: center;
+}
+
+#fotoVacio h3{
+    margin-top: 10px;
+}
+
+#fotoVacio p{
+    color: #666;
+}
+
+#fotoSubtitulo{
+    margin-top: 3px;
+    margin-bottom: 0;
+}
+
+.detalle-value{
+    background: #F8F8F8;
+    border: 1px solid #E4E4E4;
+    border-radius: 8px;
+    padding: 6px 10px;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+/* Animación */
+@keyframes modalShow{
+    from{
+        opacity:0;
+        transform:scale(.92);
+    }
+
+    to{
+        opacity:1;
+        transform:scale(1);
+    }
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<aside class="sidebar" th:fragment="sidebar">
+
+    <div class="logo">
+        <span class="logo-red">■</span>
+
+        <span class="logo-full">GEISHA</span>
+
+        <span class="logo-short">G</span>
+    </div>
+
+    <nav>
+        <ul>
+            <li th:classappend="${modulo == 'inicio'} ? 'active'">
+                <a th:href="@{/}">
+                    <i class="bi bi-house"></i>
+                    <span>Inicio</span>
+                </a>
+            </li>
+
+            <li th:classappend="${modulo == 'instituciones'} ? 'active'">
+                <a th:href="@{/instituciones}">
+                    <i class="bi bi-building"></i>
+                    <span>Instituciones</span>
+                </a>
+            </li>
+
+            <li th:classappend="${modulo == 'tramites'} ? 'active'">
+                <a th:href="@{/tramites}">
+                    <i class="bi bi-card-list"></i>
+                    <span>Trámites</span>
+                </a>
+            </li>
+
+            <li th:classappend="${modulo == 'clientes'} ? 'active'">
+                <a href="#">
+                    <i class="bi bi-people"></i>
+                    <span>Clientes</span>
+                </a>
+            </li>
+
+            <li th:classappend="${modulo == 'pedidos'} ? 'active'">
+                <a href="#">
+                    <i class="bi bi-bag"></i>
+                    <span>Pedidos</span>
+                </a>
+            </li>
+
+            <li th:classappend="${modulo == 'reportes'} ? 'active'">
+                <a href="#">
+                    <i class="bi bi-graph-up"></i>
+                    <span>Reportes</span>
+                </a>
+            </li>
+
+            <li th:classappend="${modulo == 'usuarios'} ? 'active'">
+                <a href="#">
+                    <i class="bi bi-person-gear"></i>
+                    <span>Usuarios</span>
+                </a>
+            </li>
+
+        </ul>
+
+    </nav>
+
+</aside>
+
+</html>

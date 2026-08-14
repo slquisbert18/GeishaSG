@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<!-- Indica que esta página utilizará Thymeleaf -->
+<html
+        lang="es"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+
+        layout:decorate="~{layout/layout}">
+
+<head>
+    <title>Tramites</title>
+</head>
+<body>
+<section layout:fragment="contenido">
+
+    <h1 class="page-title">
+        Trámites
+    </h1>
+
+    <div class="toolbar">
+
+        <div class="toolbar-left">
+            <a th:href="@{/tramites/nuevo}"
+               class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i>
+                Nuevo trámite
+            </a>
+        </div>
+
+        <div class="toolbar-right">
+            <form
+                    class="search-form"
+                    th:action="@{/tramites}"
+                    method="get">
+
+                <input
+                        class="search-box"
+                        type="text"
+                        name="buscar"
+                        th:value="${buscar}"
+                        placeholder="Buscar trámite...">
+
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+            <tr>
+
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Institución</th>
+                <th>Precio (Bs)</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+
+            </tr>
+
+            </thead>
+
+            <tbody>
+            <!-- Si existen tramites, se muestran normalmente-->
+            <tr th:each="tramite : ${tramites}">
+
+                <td th:text="${tramite.id}"></td>
+
+                <td th:text="${tramite.nombre}"></td>
+
+                <td th:text="${tramite.institucion.nombre}"></td>
+
+                <td>
+
+                    Bs. <span th:text="${tramite.precioBase}"></span>
+
+                <td>
+                    <span th:if="${tramite.activo}">
+                        Activo
+                    </span>
+
+                    <span th:unless="${tramite.activo}">
+                        Inactivo
+                    </span>
+                </td>
+
+                <td>
+                    <div class="table-actions">
+
+                        <button type="button"
+                                class="btn btn-foto"
+                                th:attr="data-id=${tramite.id}, data-tramite=${tramite.nombre}"
+                                title="Ver especificacion fotográfica">
+                            <i class="bi bi-camera-fill"></i>
+                        </button>
+
+                        <a
+                                th:href="@{/tramites/editar/{id}(id=${tramite.id})}"
+                                class="btn btn-secondary">
+
+                            <i class="bi bi-pencil-square"></i>
+                            Editar
+                        </a>
+
+                        <button
+                                type="button"
+                                class="btn btn-danger btn-eliminar"
+                                data-url="/tramites/eliminar"
+                                data-entidad="trámite"
+                                th:attr="data-id=${tramite.id}, data-nombre=${tramite.nombre}">
+                            <i class="bi bi-trash"></i>
+                            Eliminar
+                        </button>
+
+                    </div>
+                </td>
+
+            </tr>
+
+            <!-- Si la lista está vacía, mostramos un mensaje informativo -->
+            <tr th:if="${#lists.isEmpty(tramites)}">
+                <td colspan="6" class="empty-message">
+                    <i class="bi bi-search"></i>
+                    No se encontraron trámites.
+                </td>
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div
+            id="mensajeExito"
+            th:if="${mensajeExito}"
+            th:data-mensaje="${mensajeExito}"
+            style="display:none;">
+    </div>
+
+</section>
+</body>
+</html>

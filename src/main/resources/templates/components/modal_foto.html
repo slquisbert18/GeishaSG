@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="modalFoto"
+     id="modalFoto"
+     class="modal-overlay">
+
+    <div class="modal-card modal-foto">
+        <!-- encabezado -->
+        <div class="modal-foto-header">
+            <div class="modal-titulos">
+                <h2 id="fotoTitulo">
+                    <i class="bi bi-camara-fill"></i>
+                    Especificación fotográfica
+                </h2>
+
+                <p id="fotoSubtitulo">
+                    Trámite
+                </p>
+
+            </div>
+
+            <button type="button"
+                    id="btnCerrarFotoSup"
+                    class="btn-icon">
+                <i class="bi bi-x-lg"></i>
+            </button>
+
+        </div>
+
+        <!-- contenido si existe -->
+        <div id="fotoContenido"
+             class="modal-foto-body">
+
+            <!--datos principales-->
+            <div class="form-section">
+                <h3 class="section-title">
+                    Datos principales
+                </h3>
+
+                <div class="detalle-item">
+                    <span class="detalle-label">Ancho</span>
+                    <span id="detalleAncho" class="detalle-value"></span>
+                </div>
+
+                <div class="detalle-item">
+                    <span class="detalle-label">Alto</span>
+                    <span id="detalleAlto" class="detalle-value"></span>
+                </div>
+
+                <div class="detalle-item">
+                    <span class="detalle-label">Cantidad</span>
+                    <span id="detalleCantidad" class="detalle-value"></span>
+                </div>
+
+                <div class="detalle-item">
+                    <span class="detalle-label">Color de fondo</span>
+                    <span id="detalleColor" class="detalle-value"></span>
+                </div>
+
+                <div class="detalle-item">
+                    <span class="detalle-label">Tipo de papel</span>
+                    <span id="detallePapel" class="detalle-value"></span>
+                </div>
+            </div>
+
+            <!--datos secundarios-->
+            <div class="form-section">
+                <h3 class="section-title">
+                    Detalles técnicos
+                </h3>
+
+                <div class="detalle-grid">
+
+                    <div class="detalle-item">
+                        <span class="detalle-label">RGB</span>
+                        <span id="detalleRgb" class="detalle-value"></span>
+                    </div>
+
+                    <div class="detalle-item">
+                        <span class="detalle-label">HEX</span>
+                        <span id="detalleHex" class="detalle-value"></span>
+                    </div>
+
+                    <div class="detalle-item">
+                        <span class="detalle-label">Resolución</span>
+                        <span id="detalleResolucion" class="detalle-value"></span>
+                    </div>
+
+                    <div class="detalle-item">
+                        <span class="detalle-label">Margen</span>
+                        <span id="detalleMargen" class="detalle-value"></span>
+                    </div>
+
+                    <div class="detalle-item full">
+                        <span class="detalle-label">Observaciones</span>
+                        <span id="detalleObservaciones" class="detalle-value"></span>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div id="fotoVacio" style="display: none;">
+            <img src="/img/sinContenido.jpg"
+                 alt="Sin especificación"
+                 class="foto-empty-image">
+            <h3>
+                Este trámite aun no tienen una especificación fotográfica
+            </h3>
+        </div>
+
+        <!-- botones -->
+       <div class="modal-buttons">
+
+           <button id="btnAgregarFoto"
+                   class="btn btn-primary">
+               <i class="bi bi-plus-circle"></i>
+               Agregar especificación
+           </button>
+
+           <button id="btnEditarFoto"
+                  class="btn btn-secondary"
+                  style="display: none;">
+               <i class="bi bi-pencil-square"></i>
+               Editar
+           </button>
+
+           <button id="btnCerrarFoto"
+                  class="btn btn-secondary">
+               <i class="bi bi-x-circle"></i>
+               Cerrar
+           </button>
+       </div>
+    </div>
+
+</div>
+
+</html>

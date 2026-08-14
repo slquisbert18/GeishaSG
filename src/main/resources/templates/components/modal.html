@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<!-- modal reutilizable -->
+<div
+        th:fragment="modal"
+        id="modal"
+        class="modal-overlay">
+
+    <!-- Tarjeta del modal -->
+    <div class="modal-card">
+        <!-- Icono -->
+        <div
+                id="modalIcon"
+                class="modal-icon">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+
+        <!-- Título -->
+        <h2 id="modalTitle">
+            Título
+        </h2>
+
+        <!-- Mensaje -->
+        <p id="modalMessage">
+            Mensaje
+        </p>
+
+        <!-- Botones -->
+        <div class="modal-buttons">
+            <button
+                    id="btnCancelar"
+                    class="btn btn-secondary">
+                Cancelar
+            </button>
+
+            <button
+                    id="btnAceptar"
+                    class="btn btn-primary">
+                Aceptar
+            </button>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+</html>

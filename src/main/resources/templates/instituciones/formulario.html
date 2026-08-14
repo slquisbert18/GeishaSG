@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+
+<html lang="es"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+
+        layout:decorate="~{layout/layout}">
+
+<head>
+    <title>Nueva Institución</title>
+</head>
+
+<body>
+
+<section layout:fragment="contenido">
+
+    <h1 class="page-title" th:text="${tituloFormulario}">
+        Nueva institución
+    </h1>
+
+    <div class="form-card">
+
+        <form
+                th:action="@{/instituciones/guardar}"
+                th:object="${institucion}"
+                method="post">
+
+            <!-- agregamos el campo ID -->
+            <input type="hidden" th:field="*{id}">
+
+            <div class="form-grid">
+
+                <!-- Nombre -->
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Nombre *
+                    </label>
+
+                    <input
+                            type="text"
+                            class="form-control"
+                            th:field="*{nombre}"
+                            placeholder="Ingrese el nombre">
+
+                    <!-- Muestra el primer error asociado al campo nombre -->
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('nombre')}"
+                            th:errors="*{nombre}">
+                    </div>
+
+                </div>
+
+                <!-- Telefono -->
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Teléfono
+                    </label>
+
+                    <input
+                            type="text"
+                            class="form-control"
+                            th:field="*{telefono}"
+                            placeholder="Ingrese el teléfono">
+
+                    <!-- Muestra el primer error asociado al campo telefono -->
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('telefono')}"
+                            th:errors="*{telefono}">
+                    </div>
+
+                </div>
+
+                <!-- Dirección -->
+                <div class="form-group full">
+
+                    <label class="form-label">
+                        Dirección
+                    </label>
+
+                    <input
+                            type="text"
+                            class="form-control"
+                            th:field="*{direccion}"
+                            placeholder="Ingrese la dirección">
+
+                    <!-- Muestra el primer error asociado al campo direccion -->
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('direccion')}"
+                            th:errors="*{direccion}">
+                    </div>
+
+                </div>
+
+                <!-- Correo -->
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Correo electrónico
+                    </label>
+
+                    <input
+                            type="text"
+                            class="form-control"
+                            th:field="*{correo}"
+                            placeholder="correo@ejemplo.com">
+
+                    <!-- Muestra el primer error asociado al campo correo -->
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('correo')}"
+                            th:errors="*{correo}">
+                    </div>
+
+                </div>
+
+                <!-- Página Web -->
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Página web
+                    </label>
+
+                    <input
+                            type="url"
+                            class="form-control"
+                            th:field="*{paginaWeb}"
+                            placeholder="https://">
+
+                    <!-- Muestra el primer error asociado al campo pagina web -->
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('paginaWeb')}"
+                            th:errors="*{paginaWeb}">
+                    </div>
+
+                </div>
+
+                <!-- Horarios -->
+                <div class="form-group full">
+
+                    <label class="form-label">
+                        Horarios
+                    </label>
+
+                    <textarea
+                            class="form-control"
+                            rows="4"
+                            th:field="*{horario}"
+                            placeholder="Ej.: Lunes a Viernes de 08:00 a 18:00"></textarea>
+                    <!-- Muestra el primer error asociado al campo horarios -->
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('horario')}"
+                            th:errors="*{horario}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a th:href="@{/instituciones}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i>
+                    Cancelar
+                </a>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-floppy"></i>
+                    Guardar
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</section>
+
+</body>
+
+</html>

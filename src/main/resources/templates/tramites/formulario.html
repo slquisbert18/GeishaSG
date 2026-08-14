@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<html lang="es"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate="~{layout/layout}">
+
+<head>
+    <title>Nuevo Trámite</title>
+</head>
+
+<body>
+
+<section layout:fragment="contenido">
+
+    <h1 class="page-title" th:text="${tituloFormulario}">
+        Nuevo trámite
+    </h1>
+
+    <div class="form-card">
+
+        <form
+                th:action="@{/tramites/guardar}"
+                th:object="${tramite}"
+                method="post">
+
+            <!-- agregamos el campo ID -->
+            <input type="hidden" th:field="*{id}">
+
+            <div class="form-grid">
+
+                <!-- Nombre -->
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Nombre *
+                    </label>
+
+                    <input
+                            type="text"
+                            class="form-control"
+                            th:field="*{nombre}"
+                            placeholder="Ingrese el nombre">
+
+                    <!-- Muestra el primer error asociado al campo nombre -->
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('nombre')}"
+                            th:errors="*{nombre}">
+                    </div>
+
+                </div>
+
+                <!-- Descripcion -->
+                <div class="form-group full">
+
+                    <label class="form-label">
+                        Descripción
+                    </label>
+
+                    <textarea
+                            class="form-control"
+                            rows="3"
+                            th:field="*{descripcion}"
+                            placeholder="Ej: Actualización de registro">
+
+                    </textarea>
+                    <!-- Muestra el primer error asociado al campo horarios -->
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('descripcion')}"
+                            th:errors="*{descripcion}">
+                    </div>
+                </div>
+
+                <!-- precio base -->
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Precio
+                    </label>
+
+                    <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            class="form-control"
+                            th:field="*{precioBase}"
+                            placeholder="Ingrese el precio base">
+
+                    <!-- Muestra el primer error asociado al campo precio -->
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('precioBase')}"
+                            th:errors="*{precioBase}">
+                    </div>
+
+                </div>
+
+                <!-- estado -->
+                <div class="form-group full">
+
+                    <label class="form-label">
+                        Estado
+                    </label>
+
+                    <select th:field="*{activo}" class="form-control">
+
+                        <option th:value="true">
+                            Activo
+                        </option>
+
+                        <option th:value="false">
+                            Inactivo
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- institucion -->
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Institución
+                    </label>
+
+                    <select name="institucionId" class="form-control" required>
+
+                        <option value="">
+                            Seleccione una institución
+                        </option>
+
+                        <option
+                                th:each="institucion : ${instituciones}"
+                                th:value="${institucion.id}"
+                                th:text="${institucion.nombre}"
+                                th:selected="${institucion.id == institucionId}">
+                        </option>
+
+                    </select>
+
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('institucion')}"
+                            th:errors="*{institucion}">
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+                <a th:href="@{/tramites}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i>
+                    Cancelar
+                </a>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-floppy"></i>
+                    Guardar
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</section>
+
+</body>
+
+</html>
