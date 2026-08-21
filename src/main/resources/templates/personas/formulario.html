@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+
+<html lang="es"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate="~{layout/layout}">
+
+<head>
+    <title>Nueva Persona</title>
+</head>
+
+<body>
+
+<section layout:fragment="contenido">
+
+    <h1 class="page-title" th:text="${tituloFormulario}">
+        Nueva persona
+    </h1>
+
+    <div class="form-card">
+
+        <form
+                th:action="@{/personas/guardar}"
+                th:object="${persona}"
+                method="post">
+
+            <!-- agregamos el campo ID -->
+            <input type="hidden" th:field="*{id}">
+
+            <div class="form-grid">
+
+                <!-- Nombre -->
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Nombre(s) *
+                    </label>
+
+                    <input
+                            type="text"
+                            class="form-control"
+                            th:field="*{nombres}"
+                            placeholder="Ingrese el/los nombre(s)">
+
+                    <!-- Muestra el primer error asociado al campo nombre -->
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('nombres')}"
+                            th:errors="*{nombres}">
+                    </div>
+
+                </div>
+
+                <!-- apellido -->
+                <div class="form-group full">
+
+                    <label class="form-label">
+                        Apellido(s)
+                    </label>
+
+                    <input type="text"
+                            class="form-control"
+                            rows="3"
+                            th:field="*{apellidos}"
+                            placeholder="Ingrese el/los nombre(s)">
+
+                    <!-- Muestra el primer error asociado al campo horarios -->
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('apellidos')}"
+                            th:errors="*{apellidos}">
+                    </div>
+                </div>
+
+                <!--telefono-->
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Teléfono
+                    </label>
+
+                    <input
+                            type="text"
+                            class="form-control"
+                            th:field="*{telefono}"
+                            placeholder="71955249">
+
+                    <!-- Muestra el primer error asociado al campo telefono -->
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('telefono')}"
+                            th:errors="*{telefono}">
+                    </div>
+
+                </div>
+
+                <!-- correo -->
+                <div class="form-group full">
+
+                    <label class="form-label">
+                        Correo eléctronico
+                    </label>
+
+                    <input
+                            type="text"
+                            class="form-control"
+                            th:field="*{correo}"
+                            placeholder="correo@ejemplo.com">
+
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('correo')}"
+                            th:errors="*{correo}">
+                    </div>
+
+                </div>
+
+                <!-- fecha nacimiento -->
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Fecha de nacimiento
+                    </label>
+
+                    <input type="date"
+                           class="form-control"
+                           name="fechaNacimiento"
+                           placeholder="DD/MM/AAAA"
+                           th:value="${persona.fechaNacimiento}">
+                           <!--th:field="*{fechaNacimiento}"-->
+
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('fechaNacimiento')}"
+                            th:errors="*{fechaNacimiento}">
+                    </div>
+
+                </div>
+
+                <!-- documento de identidad -->
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Documento de identidad
+                    </label>
+
+                    <input type="text"
+                           class="form-control"
+                           th:field="*{documentoIdentidad}"
+                           placeholder="123456789 LP">
+
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('documentoIdentidad')}"
+                            th:errors="*{documentoIdentidad}">
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+                <a th:href="@{/personas}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i>
+                    Cancelar
+                </a>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-floppy"></i>
+                    Guardar
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</section>
+
+</body>
+
+</html>

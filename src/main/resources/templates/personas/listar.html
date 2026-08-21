@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+
+<html
+        lang="es"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate="~{layout/layout}">
+
+<head>
+    <title>Clientes</title>
+</head>
+
+<body>
+
+<section layout:fragment="contenido">
+
+    <h1 class="page-title">
+        Clientes
+    </h1>
+
+    <div class="toolbar">
+
+        <div class="toolbar-left">
+            <a th:href="@{/personas/nuevo}"
+               class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i>
+                Nuevo cliente
+            </a>
+        </div>
+
+        <div class="toolbar-right">
+            <form
+                    class="search-form"
+                    th:action="@{/personas}"
+                    method="get">
+
+                <input
+                        class="search-box"
+                        type="text"
+                        name="buscar"
+                        th:value="${buscar}"
+                        placeholder="Buscar persona...">
+
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+
+            </form>
+        </div>
+
+    </div>
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+            <tr>
+                <th>ID</th>
+                <th>Nombre(s)</th>
+                <th>Apellido(s)</th>
+                <th>Teléfono</th>
+                <th>Correo</th>
+                <th>Documento</th>
+                <th>Acciones</th>
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            <!-- Si existen personas, se muestran normalmente -->
+            <tr th:each="persona : ${personas}">
+
+                <td th:text="${persona.id}"></td>
+
+                <td th:text="${persona.nombres}"></td>
+
+                <td th:text="${persona.apellidos}"></td>
+
+                <td th:text="${persona.telefono}"></td>
+
+                <td th:text="${persona.correo}"></td>
+
+                <td th:text="${persona.documentoIdentidad}"></td>
+
+                <td>
+                    <div class="table-actions">
+
+                        <a
+                                th:href="@{/personas/editar/{id}(id=${persona.id})}"
+                                class="btn btn-secondary">
+
+                            <i class="bi bi-pencil-square"></i>
+                            Editar
+
+                        </a>
+
+                        <button
+                                type="button"
+                                class="btn btn-danger btn-eliminar"
+                                data-url="/personas/eliminar"
+                                data-entidad="persona"
+                                th:attr="data-id=${persona.id},
+                                         data-nombre=${persona.nombres + ' ' + persona.apellidos}">
+
+                            <i class="bi bi-trash"></i>
+                            Eliminar
+
+                        </button>
+
+                    </div>
+                </td>
+
+            </tr>
+
+            <!-- Si la lista está vacía -->
+            <tr th:if="${#lists.isEmpty(personas)}">
+
+                <td colspan="7" class="empty-message">
+
+                    <i class="bi bi-search"></i>
+                    No se encontraron personas.
+
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div
+            id="mensajeExito"
+            th:if="${mensajeExito}"
+            th:data-mensaje="${mensajeExito}"
+            style="display:none;">
+    </div>
+
+</section>
+
+</body>
+
+</html>

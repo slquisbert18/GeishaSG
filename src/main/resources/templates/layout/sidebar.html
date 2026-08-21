@@ -34,15 +34,22 @@
                 </a>
             </li>
 
-            <li th:classappend="${modulo == 'clientes'} ? 'active'">
-                <a href="#">
+            <li th:classappend="${modulo == 'personas'} ? 'active'">
+                <a th:href="@{/personas}">
                     <i class="bi bi-people"></i>
                     <span>Clientes</span>
                 </a>
             </li>
 
+            <li th:classappend="${modulo == 'trabajadores'} ? 'active'">
+                <a th:href="@{/trabajadores}">
+                    <i class="bi bi-person-gear"></i>
+                    <span>Usuarios</span>
+                </a>
+            </li>
+
             <li th:classappend="${modulo == 'pedidos'} ? 'active'">
-                <a href="#">
+                <a th:href="@{/pedidos}">
                     <i class="bi bi-bag"></i>
                     <span>Pedidos</span>
                 </a>
@@ -55,12 +62,12 @@
                 </a>
             </li>
 
-            <li th:classappend="${modulo == 'usuarios'} ? 'active'">
-                <a href="#">
-                    <i class="bi bi-person-gear"></i>
-                    <span>Usuarios</span>
-                </a>
-            </li>
+<!--            <li th:classappend="${modulo == 'usuarios'} ? 'active'">-->
+<!--                <a href="#">-->
+<!--                    <i class="bi bi-person-gear"></i>-->
+<!--                    <span>Usuarios</span>-->
+<!--                </a>-->
+<!--            </li>-->
 
         </ul>
 

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html
+        lang="es"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate="~{layout/layout}">
+
+<head>
+    <title>Nuevo usuario</title>
+</head>
+
+<body>
+
+<section layout:fragment="contenido">
+
+    <h1 class="page-title" th:text="${tituloFormulario}">
+        Nuevo usuario
+    </h1>
+
+    <div class="form-card">
+
+        <form
+                th:action="@{/trabajadores/guardar}"
+                th:object="${trabajadorForm}"
+                method="post">
+
+            <!-- ID del usuario -->
+            <input type="hidden" th:field="*{usuario.id}">
+            <input type="hidden" th:field="*{persona.id}">
+
+            <!-- DATOS PERSONALES -->
+            <h3>Datos personales</h3>
+
+            <div class="form-grid">
+
+                <!-- Nombres -->
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Nombre(s) *
+                    </label>
+
+                    <input
+                            type="text"
+                            class="form-control"
+                            th:field="*{persona.nombres}"
+                            placeholder="Ingrese el/los nombre(s)">
+
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('persona.nombres')}"
+                            th:errors="*{persona.nombres}">
+                    </div>
+
+                </div>
+
+                <!-- Apellidos -->
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Apellido(s) *
+                    </label>
+
+                    <input
+                            type="text"
+                            class="form-control"
+                            th:field="*{persona.apellidos}"
+                            placeholder="Ingrese el/los apellido(s)">
+
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('persona.apellidos')}"
+                            th:errors="*{persona.apellidos}">
+                    </div>
+
+                </div>
+
+                <!-- Teléfono -->
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Teléfono
+                    </label>
+
+                    <input
+                            type="text"
+                            class="form-control"
+                            th:field="*{persona.telefono}"
+                            placeholder="Ingrese el teléfono">
+
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('persona.telefono')}"
+                            th:errors="*{persona.telefono}">
+                    </div>
+
+                </div>
+
+                <!-- Correo -->
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Correo electrónico
+                    </label>
+
+                    <input
+                            type="email"
+                            class="form-control"
+                            th:field="*{persona.correo}"
+                            placeholder="correo@ejemplo.com">
+
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('persona.correo')}"
+                            th:errors="*{persona.correo}">
+                    </div>
+
+                </div>
+
+                <!-- Fecha de nacimiento -->
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Fecha de nacimiento
+                    </label>
+
+                    <input
+                            type="date"
+                            class="form-control"
+                            name="persona.fechaNacimiento"
+                            th:value="${trabajadorForm.persona.fechaNacimiento}">
+
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('persona.fechaNacimiento')}"
+                            th:errors="*{persona.fechaNacimiento}">
+                    </div>
+
+                </div>
+
+                <!-- Documento de identidad -->
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Documento de identidad
+                    </label>
+
+                    <input
+                            type="text"
+                            class="form-control"
+                            th:field="*{persona.documentoIdentidad}"
+                            placeholder="123456789 LP">
+
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('persona.documentoIdentidad')}"
+                            th:errors="*{persona.documentoIdentidad}">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- DATOS DE ACCESO -->
+
+            <h3>Datos de acceso</h3>
+
+            <div class="form-grid">
+
+                <!-- Nombre de usuario -->
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Nombre de usuario *
+                    </label>
+
+                    <input
+                            type="text"
+                            class="form-control"
+                            th:field="*{usuario.nombreUsuario}"
+                            placeholder="Ingrese el nombre de usuario">
+
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('usuario.nombreUsuario')}"
+                            th:errors="*{usuario.nombreUsuario}">
+                    </div>
+
+                </div>
+
+                <!-- Contraseña -->
+                <div class="form-group"
+                     th:if="${trabajadorForm.usuario.id == null}">
+
+                    <label class="form-label">
+                        Contraseña *
+                    </label>
+
+                    <input
+                            type="password"
+                            class="form-control"
+                            th:field="*{usuario.contrasena}"
+                            placeholder="Ingrese la contraseña">
+
+                    <div
+                            class="field-error"
+                            th:if="${#fields.hasErrors('usuario.contrasena')}"
+                            th:errors="*{usuario.contrasena}">
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Rol *
+                    </label>
+
+                    <select class="form-control"
+                            th:field="*{usuario.rol}">
+
+                        <option value="TRABAJADOR">
+                            Trabajador
+                        </option>
+
+                        <option value="ADMINISTRADOR">
+                            Administrador
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Estado -->
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Estado
+                    </label>
+
+                    <select
+                            class="form-control"
+                            th:field="*{usuario.activo}">
+
+                        <option value="true">
+                            Activo
+                        </option>
+
+                        <option value="false">
+                            Inactivo
+                        </option>
+
+                    </select>
+                </div>
+            </div>
+
+
+            <!-- BOTONES -->
+            <div class="form-actions">
+
+                <a
+                        th:href="@{/trabajadores}"
+                        class="btn btn-secondary">
+
+                    <i class="bi bi-x-circle"></i>
+                    Cancelar
+
+                </a>
+
+                <button
+                        type="submit"
+                        class="btn btn-primary">
+
+                    <i class="bi bi-floppy"></i>
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+
+</section>
+</body>
+</html>

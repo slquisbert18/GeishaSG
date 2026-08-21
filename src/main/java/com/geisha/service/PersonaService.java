@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface PersonaService {
     List<Persona> listarTodos();
+    List<Persona> listarClientes();
     Optional<Persona> buscarPorId(Long id);
     Optional<Persona> buscarPorDocumentoIdentidad(String ci);
     Persona guardar(Persona persona);

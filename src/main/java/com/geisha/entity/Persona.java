@@ -41,6 +41,7 @@ public class Persona {
     private String correo;
 
 
+    @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
 
     @Size(max=30, message="El documento de identidad no puede superar los 30 caracteres.")

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html
+        lang="es"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate="~{layout/layout}">
+
+<head>
+    <title>Pedidos</title>
+</head>
+
+<body>
+
+<section layout:fragment="contenido">
+
+    <h1 class="page-title">
+        Pedidos
+    </h1>
+
+
+    <!-- Barra de herramientas -->
+    <div class="toolbar">
+
+        <div class="toolbar-left">
+
+            <a th:href="@{/pedidos/nuevo}"
+               class="btn btn-primary">
+
+                <i class="bi bi-plus-circle"></i>
+                Nuevo pedido
+
+            </a>
+
+        </div>
+
+
+        <div class="toolbar-right">
+
+            <form
+                    class="search-form"
+                    th:action="@{/pedidos}"
+                    method="get">
+
+                <input
+                        class="search-box"
+                        type="text"
+                        name="buscar"
+                        th:value="${buscar}"
+                        placeholder="Buscar cliente...">
+
+                <button
+                        class="btn btn-primary"
+                        type="submit">
+
+                    <i class="bi bi-search"></i>
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- Tabla de pedidos -->
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+            <tr>
+
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Empleado</th>
+                <th>Monto total</th>
+                <th>Acciones</th>
+
+            </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            <!-- Pedidos -->
+            <tr th:each="pedido : ${pedidos}">
+
+                <td th:text="${pedido.id}"></td>
+
+                <td th:text="${#temporals.format(
+                        pedido.fechaRegistro,
+                        'dd/MM/yyyy HH:mm'
+                )}">
+                </td>
+
+                <td th:text="${pedido.cliente.nombres + ' ' + pedido.cliente.apellidos}">
+                </td>
+
+                <td th:text="${pedido.empleado.nombres + ' ' + pedido.empleado.apellidos}">
+                </td>
+
+                <td>
+                    Bs.
+                    <span
+                            th:text="${#numbers.formatDecimal(
+                                pedido.montoTotal,
+                                1,
+                                2
+                            )}">
+                    </span>
+                </td>
+
+
+                <td>
+
+                    <div class="table-actions">
+
+
+                        <!-- Detalles -->
+                        <button
+                                type="button"
+                                class="btn btn-secondary">
+
+                            <i class="bi bi-eye"></i>
+                            Detalles
+
+                        </button>
+
+
+                        <!-- Editar -->
+                        <a
+                                th:href="@{/pedidos/editar/{id}(id=${pedido.id})}"
+                                class="btn btn-secondary">
+
+                            <i class="bi bi-pencil-square"></i>
+                            Editar
+
+                        </a>
+
+
+                        <!-- Eliminar -->
+                        <button
+                                type="button"
+                                class="btn btn-danger btn-eliminar"
+                                data-url="/pedidos/eliminar"
+                                data-entidad="pedido"
+                                th:attr="data-id=${pedido.id}">
+
+                            <i class="bi bi-trash"></i>
+                            Eliminar
+
+                        </button>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+
+            <!-- Lista vacía -->
+            <tr th:if="${#lists.isEmpty(pedidos)}">
+
+                <td
+                        colspan="6"
+                        class="empty-message">
+
+                    <i class="bi bi-search"></i>
+
+                    No se encontraron pedidos.
+
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- Mensaje de éxito -->
+    <div
+            id="mensajeExito"
+            th:if="${mensajeExito}"
+            th:data-mensaje="${mensajeExito}"
+            style="display:none;">
+    </div>
+
+
+</section>
+
+</body>
+
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+
+<html
+        lang="es"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate="~{layout/layout}">
+
+<head>
+    <title>Usuarios</title>
+</head>
+
+<body>
+
+<section layout:fragment="contenido">
+
+    <h1 class="page-title">
+        Usuarios
+    </h1>
+
+    <div class="toolbar">
+
+        <div class="toolbar-left">
+            <a th:href="@{/trabajadores/nuevo}"
+               class="btn btn-primary">
+
+                <i class="bi bi-plus-circle"></i>
+                Nuevo usuario
+
+            </a>
+        </div>
+
+    </div>
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+            <tr>
+                <th>ID</th>
+                <th>Nombre(s)</th>
+                <th>Apellido(s)</th>
+                <th>Teléfono</th>
+                <th>Usuario</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            <!-- Si existen trabajadores -->
+            <tr th:each="trabajador : ${trabajadores}">
+
+                <td th:text="${trabajador.usuario.id}"></td>
+
+                <td th:text="${trabajador.persona.nombres}"></td>
+
+                <td th:text="${trabajador.persona.apellidos}"></td>
+
+                <td th:text="${trabajador.persona.telefono}"></td>
+
+                <td th:text="${trabajador.usuario.nombreUsuario}"></td>
+
+                <td th:text="${trabajador.usuario.rol}"></td>
+
+                <td>
+                    <span th:if="${trabajador.usuario.activo}">
+                        Activo
+                    </span>
+                    <span th:unless="${trabajador.usuario.activo}">
+                        Inactivo
+                    </span>
+
+                </td>
+
+                <td>
+
+                    <div class="table-actions">
+                        <a th:href="@{/trabajadores/editar/{id}(id=${trabajador.usuario.id})}"
+                           class="btn btn-secondary">
+
+                            <i class="bi bi-pencil-square"></i>
+                            Editar
+
+                        </a>
+
+                        <button
+                                type="button"
+                                class="btn btn-danger btn-eliminar"
+                                data-url="/trabajadores/eliminar"
+                                data-entidad="trabajador"
+                                th:attr="data-id=${trabajador.usuario.id},
+                                         data-nombre=${trabajador.persona.nombres + ' ' + trabajador.persona.apellidos}">
+
+                            <i class="bi bi-trash"></i>
+                            Eliminar
+
+                        </button>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+            <!-- Si la lista está vacía -->
+            <tr th:if="${#lists.isEmpty(trabajadores)}">
+
+                <td colspan="8" class="empty-message">
+
+                    <i class="bi bi-search"></i>
+                    No se encontraron elementos.
+
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div
+            id="mensajeExito"
+            th:if="${mensajeExito}"
+            th:data-mensaje="${mensajeExito}"
+            style="display:none;">
+    </div>
+
+</section>
+
+</body>
+
+</html>
+

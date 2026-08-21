@@ -19,28 +19,34 @@ public class PersonaServiceImpl implements PersonaService {
         return personaRepository.findAll();
     }
 
+
+    @Override
+    public List<Persona> listarClientes(){
+        return personaRepository.listarClientes();
+    }
+
     @Override
     public Optional<Persona> buscarPorId(Long id){
         return personaRepository.findById(id);
     }
 
+    @Override
     public Optional<Persona> buscarPorDocumentoIdentidad(String ci){
         return personaRepository.findByDocumentoIdentidad(ci);
     }
 
     @Override
     public Persona guardar(Persona persona){
-        //verificamos que la persona existe
-        if(personaRepository.existsByDocumentoIdentidad(persona.getDocumentoIdentidad())){
-            // si el id de la persona es nulo se trata de un nuevo registro
+        Optional<Persona> personaExistente = personaRepository.findByDocumentoIdentidad(persona.getDocumentoIdentidad());
+        if(personaExistente.isPresent()){
+            // nueva persona
             if(persona.getId() == null){
                 throw new RuntimeException("Ya existe una persona con ese documento de identidad");
             }
 
-            Persona existente = personaRepository.findById(persona.getId()).orElse(null);
-
-            if(existente == null || !existente.getDocumentoIdentidad().equalsIgnoreCase(persona.getDocumentoIdentidad())){
-                throw new RuntimeException("Ya existe otra persona con ese documento de identidad");
+            // edicion: verificar que no sea otra persona
+            if(!personaExistente.get().getId().equals(persona.getId())){
+                throw new RuntimeException("Existe una persona con ese documento de identidad");
             }
         }
         return personaRepository.save(persona);
@@ -53,6 +59,6 @@ public class PersonaServiceImpl implements PersonaService {
 
     @Override
     public List<Persona> buscarPorNombreOApellido(String nombreApellido){
-        return personaRepository.findByNombresContainingIgnoreCaseOrApellidosContainingIgnoreCase(nombreApellido, nombreApellido);
+        return personaRepository.buscarClientes(nombreApellido);
     }
 }
