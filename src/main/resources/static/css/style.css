@@ -681,3 +681,30 @@ tbody tr:hover{
         transform:scale(1);
     }
 }
+
+/* ===== Pantalla de login ===== */
+.login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 380px;
+}
+
+.mensaje-error {
+    color: #c0392b;
+}
+
+.mensaje-exito {
+    color: #27ae60;
+}
+
+/* form de logout dentro del topbar: que no rompa el layout en linea */
+.logout-form {
+    display: inline-flex;
+    margin: 0;
+}

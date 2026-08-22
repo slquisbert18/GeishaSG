@@ -42,4 +42,10 @@ public class Pedido {
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<DetalleTrabajo> detalles = new ArrayList<>();
+
+    // guardar la fecha y hora automaticamente
+    @PrePersist
+    public void prePersist(){
+        fechaRegistro = LocalDateTime.now();
+    }
 }

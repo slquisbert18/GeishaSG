@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 
 <aside class="sidebar" th:fragment="sidebar">
 
@@ -41,7 +41,9 @@
                 </a>
             </li>
 
-            <li th:classappend="${modulo == 'trabajadores'} ? 'active'">
+            <!-- solo visible para ADMINISTRADOR: coincide con la restriccion -->
+            <li th:classappend="${modulo == 'trabajadores'} ? 'active'"
+                sec:authorize="hasRole('ADMINISTRADOR')">
                 <a th:href="@{/trabajadores}">
                     <i class="bi bi-person-gear"></i>
                     <span>Usuarios</span>
@@ -61,13 +63,6 @@
                     <span>Reportes</span>
                 </a>
             </li>
-
-<!--            <li th:classappend="${modulo == 'usuarios'} ? 'active'">-->
-<!--                <a href="#">-->
-<!--                    <i class="bi bi-person-gear"></i>-->
-<!--                    <span>Usuarios</span>-->
-<!--                </a>-->
-<!--            </li>-->
 
         </ul>
 

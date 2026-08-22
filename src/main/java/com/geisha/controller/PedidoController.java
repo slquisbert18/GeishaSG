@@ -1,10 +1,12 @@
 package com.geisha.controller;
 
 import com.geisha.entity.Pedido;
+import com.geisha.security.UsuarioDetails;
 import com.geisha.service.PedidoService;
 import com.geisha.service.PersonaService;
 import com.geisha.service.TramiteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -66,14 +68,27 @@ public class PedidoController {
 
     // guardar
     @PostMapping("/pedidos/guardar")
-    public String guardar(@ModelAttribute Pedido pedido, RedirectAttributes redirectAttributes) {
+    public String guardar(@ModelAttribute Pedido pedido,
+                          @AuthenticationPrincipal UsuarioDetails usuarioDetails,
+                          RedirectAttributes redirectAttributes) {
 
         boolean esNuevo = pedido.getId() == null;
-        pedido.setEmpleado(personaService.buscarPorId(1L).orElseThrow());
-        // solucion temporal
-//        if(esNuevo){
-//            pedido.setEmpleado(personaService.buscarPorId(1L).orElseThrow());
-//        }
+
+        if(esNuevo){
+            // Spring Security inyecta aqui al usuario que tiene la sesion
+            // activa (el que resolvio UsuarioDetailsService en el login).
+            // De ahi sacamos la Persona real: asi el pedido queda
+            // registrado a nombre de quien realmente esta atendiendo,
+            // sin depender de un id fijo ni de que el formulario lo mande.
+            pedido.setEmpleado(usuarioDetails.getUsuario().getPersona());
+        } else {
+            // el formulario de edicion no incluye el campo "empleado", por
+            // lo que @ModelAttribute lo deja en null: se recupera el
+            // empleado original desde BD para no perder ese dato ni
+            // reasignar el pedido a quien lo esta editando ahora.
+            Pedido pedidoExistente = pedidoService.buscarPorId(pedido.getId()).orElseThrow();
+            pedido.setEmpleado(pedidoExistente.getEmpleado());
+        }
 
         pedidoService.guardar(pedido);
 

@@ -7,6 +7,7 @@ import com.geisha.repository.PersonaRepository;
 import com.geisha.repository.UsuarioRepository;
 import com.geisha.service.TrabajadorService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ public class TrabajadorServiceImpl implements TrabajadorService {
 
     private final PersonaRepository personaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional(readOnly = true)
@@ -65,8 +67,13 @@ public class TrabajadorServiceImpl implements TrabajadorService {
             if(usuario.getContrasena() == null || usuario.getContrasena().isBlank()){
                 throw new RuntimeException("La contraseña es obligatoria");
             }
-        }
 
+            // nunca se guarda en texto plano: se guarda el hash bcrypt.
+            // Con esto el login (via UsuarioDetails.getPassword()) puede
+            // comparar el hash guardado contra un nuevo hash del intento
+            // de acceso, sin que la contraseña real quede expuesta en BD.
+            usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
+        }
 
         if (usuario.getActivo() == null) {
             usuario.setActivo(true);
