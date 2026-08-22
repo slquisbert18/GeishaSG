@@ -1,16 +1,27 @@
 package com.geisha.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.geisha.entity.DetalleTrabajo;
 import com.geisha.entity.Pedido;
+import com.geisha.entity.Tramite;
 import com.geisha.security.UsuarioDetails;
 import com.geisha.service.PedidoService;
 import com.geisha.service.PersonaService;
 import com.geisha.service.TramiteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -19,6 +30,7 @@ public class PedidoController {
     private final PedidoService pedidoService;
     private final PersonaService personaService;
     private final TramiteService tramiteService;
+    private final ObjectMapper objectMapper;
 
     // listar
     @GetMapping("/pedidos")
@@ -36,11 +48,13 @@ public class PedidoController {
 
         model.addAttribute("pedido", new Pedido());
 
+        agregarDatosDeApoyo(model);
+
         // Clientes disponibles
-        model.addAttribute("clientes", personaService.listarClientes());
+//        model.addAttribute("clientes", personaService.listarClientes());
 
         // Trámites disponibles
-        model.addAttribute("tramites", tramiteService.listarTodos());
+//        model.addAttribute("tramites", tramiteService.listarTodos());
 
         model.addAttribute("tituloFormulario", "Nuevo pedido");
         model.addAttribute("modulo", "pedidos");
@@ -56,9 +70,11 @@ public class PedidoController {
 
         model.addAttribute("pedido", pedido);
 
-        model.addAttribute("clientes", personaService.listarClientes());
+        agregarDatosDeApoyo(model);
 
-        model.addAttribute("tramites", tramiteService.listarTodos());
+//        model.addAttribute("clientes", personaService.listarClientes());
+//
+//        model.addAttribute("tramites", tramiteService.listarTodos());
 
         model.addAttribute("tituloFormulario", "Editar pedido");
         model.addAttribute("modulo", "pedidos");
@@ -66,13 +82,62 @@ public class PedidoController {
         return "pedidos/formulario";
     }
 
+    /*
+     * Arma los datos que el formulario necesita para los combobox de
+     * busqueda (cliente y tramite). En vez de pasar las entidades
+     * completas (que arrastran relaciones @ManyToOne/@OneToOne perezosas
+     * dificiles de convertir a JSON), armamos mapas simples con solo lo
+     * que la vista necesita mostrar y filtrar, y los serializamos a JSON
+     * aqui mismo para que la plantilla solo tenga que "pegarlos" dentro
+     * de un <script> (ver pedidos/formulario.html).
+     */
+    private void agregarDatosDeApoyo(Model model){
+        List<Map<String, Object>> clientes = personaService.listarClientes().stream().
+                map(persona -> {
+                    Map<String, Object> item = new LinkedHashMap<>();
+                    item.put("id", persona.getId());
+                    item.put("nombre", persona.getNombres() + " " + persona.getApellidos());
+                    return item;
+                }).toList();
+
+        // solo mostrar tramites activos
+        List<Map<String, Object>> tramites = tramiteService.listarTodos().stream()
+                .filter(Tramite::getActivo)
+                .map(tramite -> {
+                    Map<String, Object> item = new LinkedHashMap<>();
+                    item.put("id", tramite.getId());
+                    item.put("nombre", tramite.getNombre());
+                    // BigDecimal puede venir null si el tramite no definio precio base
+                    item.put("precio", tramite.getPrecioBase() != null ? tramite.getPrecioBase() : BigDecimal.ZERO);
+                    return item;
+                }).toList();
+
+        model.addAttribute("clientesJson", aJson(clientes));
+        model.addAttribute("tramitesJson", aJson(tramites));
+    }
+
+    private String aJson(Object valor){
+        try{
+            return objectMapper.writeValueAsString(valor);
+        }
+        catch(JsonProcessingException e){
+            throw new RuntimeException("No se pudo preparar los datos del formulario", e);
+        }
+    }
+
     // guardar
     @PostMapping("/pedidos/guardar")
     public String guardar(@ModelAttribute Pedido pedido,
+                          @RequestParam(required = false) List<Long> detalleTramiteId,
+                          @RequestParam(required = false) List<BigDecimal> detallePrecio,
+                          @RequestParam(required = false) List<String> detalleObservaciones,
                           @AuthenticationPrincipal UsuarioDetails usuarioDetails,
+                          Model model,
                           RedirectAttributes redirectAttributes) {
 
         boolean esNuevo = pedido.getId() == null;
+
+        Pedido pedidoExistente = esNuevo ? null : pedidoService.buscarPorId(pedido.getId()).orElseThrow();
 
         if(esNuevo){
             // Spring Security inyecta aqui al usuario que tiene la sesion
@@ -86,9 +151,77 @@ public class PedidoController {
             // lo que @ModelAttribute lo deja en null: se recupera el
             // empleado original desde BD para no perder ese dato ni
             // reasignar el pedido a quien lo esta editando ahora.
-            Pedido pedidoExistente = pedidoService.buscarPorId(pedido.getId()).orElseThrow();
+            pedido.setFechaRegistro(pedidoExistente.getFechaRegistro());
             pedido.setEmpleado(pedidoExistente.getEmpleado());
         }
+
+        // ===== VALIDACION =====
+        // en vez de tirar una excepcion generica (que manda a la pagina de
+        // error y pierde todo lo que el usuario escribio), juntamos los
+        // problemas encontrados y, si hay alguno, volvemos a mostrar el
+        // mismo formulario con los datos ya ingresados y el mensaje
+        // correspondiente junto a cada campo.
+        List<String> errores = new ArrayList<>();
+        if(pedido.getCliente() == null){
+            errores.add("cliente");
+        }
+
+        if(detalleTramiteId == null || detalleTramiteId.isEmpty()){
+            errores.add("trabajos:El pedido debe incluir al menos un trabajo");
+        }
+        else{
+            for(int i = 0 ; i < detalleTramiteId.size() ; i++){
+                if(detalleTramiteId.get(i) == null){
+                    errores.add("trabajos:Seleccione un trámite en todas las filas");
+                    break;
+                }
+                BigDecimal precio = (detallePrecio != null && detallePrecio.size() > i) ? detallePrecio.get(i) : null;
+                if(precio == null || precio.compareTo(BigDecimal.ZERO) <= 0){
+                    errores.add("trabajos:El precio de cada trabajo debe ser mayor a cero");
+                    break;
+                }
+            }
+        }
+
+        if(!errores.isEmpty()){
+            return volverAlFormularioConError(pedido, detalleTramiteId, detallePrecio, detalleObservaciones, errores, model);
+        }
+
+        List<DetalleTrabajo> detalles = new ArrayList<>();
+        BigDecimal montoTotal = BigDecimal.ZERO;
+
+        for(int i = 0 ; i < detalleTramiteId.size() ; i++){
+            Tramite tramite = tramiteService.buscarPorId(detalleTramiteId.get(i))
+                    .orElseThrow(() -> new RuntimeException("Trámite no encontrado"));
+
+            BigDecimal precio = detallePrecio.get(i);
+
+            // observaciones es opcional, si no se envia nada o la fila no tiene texto, queda null
+            String observaciones = (detalleObservaciones != null && detalleObservaciones.size() > i)
+                    ? detalleObservaciones.get(i)
+                    : null;
+
+            DetalleTrabajo detalle = DetalleTrabajo.builder()
+                    .tramite(tramite)
+                    .precioServicio(precio)
+                    .observaciones((observaciones == null || observaciones.isBlank()) ? null : observaciones)
+                    .pedido(pedido)
+                    .build();
+            detalles.add(detalle);
+            montoTotal = montoTotal.add(precio);
+        }
+
+        // el input de monto total en el formulario es solo de lectura
+        // (una vista previa calculada en JS); el valor que realmente se
+        // guarda se recalcula aqui, sumando los precios de cada trabajo,
+        // para que nadie pueda alterar el total manipulando el request
+        pedido.setMontoTotal(montoTotal);
+
+        // se reemplaza la lista completa de trabajos del pedido. Gracias a
+        // cascade=ALL + orphanRemoval=true en Pedido.detalles, al guardar
+        // Hibernate borra los trabajos que ya no esten en esta lista y guarda
+        // los nuevos, todo en la misma transaccion.
+        pedido.setDetalles(detalles);
 
         pedidoService.guardar(pedido);
 
@@ -99,6 +232,60 @@ public class PedidoController {
         );
 
         return "redirect:/pedidos";
+    }
+
+    /*
+     * Vuelve a mostrar pedidos/formulario con lo que el usuario ya habia
+     * llenado (para no obligarlo a escribir todo de nuevo) mas los
+     * mensajes de error correspondientes.
+     *
+     * "errores" mezcla dos formatos simples para no crear una clase extra:
+     *  - "cliente"            -> error general del campo cliente
+     *  - "trabajos:<mensaje>" -> mensaje de error para la seccion de trabajos
+     */
+    private String volverAlFormularioConError(Pedido pedido,
+                                              List<Long> detalleTramiteId,
+                                              List<BigDecimal> detallePrecio,
+                                              List<String> detalleObservaciones,
+                                              List<String> errores,
+                                              Model model) {
+
+        model.addAttribute("errorCliente", errores.contains("cliente"));
+
+        String errorTrabajos = errores.stream()
+                .filter(e -> e.startsWith("trabajos:"))
+                .map(e -> e.substring("trabajos:".length()))
+                .findFirst()
+                .orElse(null);
+        model.addAttribute("errorTrabajos", errorTrabajos);
+
+        // reconstruye las filas de trabajo ya ingresadas (aunque no se
+        // vayan a guardar) para que la vista las vuelva a dibujar con
+        // th:each="detalle : ${pedido.detalles}" tal como ya lo hace para
+        // la edicion normal, sin necesitar una plantilla aparte
+        List<DetalleTrabajo> detalles = new ArrayList<>();
+        if (detalleTramiteId != null) {
+            for (int i = 0; i < detalleTramiteId.size(); i++) {
+                Long tramiteId = detalleTramiteId.get(i);
+                Tramite tramite = tramiteId != null ? tramiteService.buscarPorId(tramiteId).orElse(null) : null;
+
+                DetalleTrabajo detalle = DetalleTrabajo.builder()
+                        .tramite(tramite)
+                        .precioServicio((detallePrecio != null && detallePrecio.size() > i) ? detallePrecio.get(i) : null)
+                        .observaciones((detalleObservaciones != null && detalleObservaciones.size() > i) ? detalleObservaciones.get(i) : null)
+                        .build();
+
+                detalles.add(detalle);
+            }
+        }
+        pedido.setDetalles(detalles);
+
+        model.addAttribute("pedido", pedido);
+        agregarDatosDeApoyo(model);
+        model.addAttribute("tituloFormulario", pedido.getId() == null ? "Nuevo pedido" : "Editar pedido");
+        model.addAttribute("modulo", "pedidos");
+
+        return "pedidos/formulario";
     }
 
     // eliminar

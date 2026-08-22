@@ -352,3 +352,171 @@ async function cargarEspecificacion(tramiteId){
         mostrarError("No fue posible obtener la especificacion fotografica");
     }
 }
+
+/*
+ * Combobox de busqueda: junta un <input type="text"> con una lista
+ * desplegable filtrable y un <input type="hidden"> que guarda el id de
+ * lo que el usuario selecciono. Se usa para reemplazar los <select>
+ * tradicionales cuando la lista de opciones es larga y conviene poder
+ * escribir para filtrar (clientes, tramites, etc).
+ */
+function crearCombobox({ input, hidden, dropdown, items, getLabel, getId, onSelect }) {
+
+    // dibuja la lista de coincidencias segun lo que el usuario escribio
+    function render(filtro) {
+        dropdown.innerHTML = "";
+
+        const texto = filtro.trim().toLowerCase();
+
+        // sin texto se muestran todas las opciones; con texto, solo las
+        // que contienen ese texto en su nombre (busqueda simple, no
+        // distingue mayusculas/minusculas ni tildes)
+        const coincidencias = items.filter(item =>
+            getLabel(item).toLowerCase().includes(texto)
+        );
+
+        if (coincidencias.length === 0) {
+            dropdown.classList.remove("show");
+            return;
+        }
+
+        coincidencias.forEach(item => {
+            const li = document.createElement("li");
+            li.textContent = getLabel(item);
+
+            // "mousedown" en vez de "click": el mousedown ocurre ANTES
+            // que el "blur" del input, asi la seleccion se registra antes
+            // de que el listener de blur cierre la lista
+            li.addEventListener("mousedown", (evento) => {
+                evento.preventDefault();
+
+                input.value = getLabel(item);
+                hidden.value = getId(item);
+
+                dropdown.classList.remove("show");
+
+                if (onSelect) {
+                    onSelect(item);
+                }
+            });
+
+            dropdown.appendChild(li);
+        });
+
+        dropdown.classList.add("show");
+    }
+
+    // al escribir, la seleccion anterior deja de ser valida hasta que
+    // el usuario elija una opcion de la lista de nuevo
+    input.addEventListener("input", () => {
+        hidden.value = "";
+        render(input.value);
+    });
+
+    // al enfocar el input tambien se muestra la lista completa (si esta
+    // vacio) o filtrada (si ya tenia texto), para no obligar a borrar y
+    // volver a escribir
+    input.addEventListener("focus", () => render(input.value));
+
+    // clic fuera del combobox: cierra la lista
+    document.addEventListener("click", (evento) => {
+        if (!input.contains(evento.target) && !dropdown.contains(evento.target)) {
+            dropdown.classList.remove("show");
+        }
+    });
+}
+
+
+/*
+ * Logica del formulario de pedido:
+ *  - combobox de cliente (busqueda con texto)
+ *  - filas de "trabajos" (detalle_trabajo) que se pueden agregar/quitar,
+ *    cada una con su propio combobox de tramite
+ *  - suma en vivo de los precios de cada fila para mostrar el monto total
+ *
+ * CLIENTES y TRAMITES son arreglos globales que llegan ya listos desde el
+ * servidor, asi este script no necesita pedirlos por su cuenta.
+ */
+document.addEventListener("DOMContentLoaded", () => {
+
+    const contenedorFilas = document.querySelector("#filasTrabajos");
+    const plantillaFila = document.querySelector("#plantillaFilaTrabajo");
+    const btnAgregarFila = document.querySelector("#btnAgregarTrabajo");
+    const montoTotalDisplay = document.querySelector("#montoTotalDisplay");
+
+    // ===== combobox de cliente =====
+    // (input, oculto y lista ya vienen renderizados en el HTML; si el
+    // pedido es una edicion, tambien vienen con el cliente actual precargado)
+    crearCombobox({
+        input: document.querySelector("#clienteInput"),
+        hidden: document.querySelector("#clienteHidden"),
+        dropdown: document.querySelector("#clienteDropdown"),
+        items: CLIENTES,
+        getLabel: (cliente) => cliente.nombre,
+        getId: (cliente) => cliente.id
+    });
+
+    // recalcula el monto total sumando el precio de cada fila visible
+    function recalcularTotal() {
+        const total = [...contenedorFilas.querySelectorAll(".precio-input")]
+            .reduce((suma, input) => suma + (parseFloat(input.value) || 0), 0);
+
+        montoTotalDisplay.value = total.toFixed(2);
+    }
+
+    // conecta el combobox de tramite y los listeners de una fila de trabajo
+    // (se llama tanto para las filas que ya vienen en el HTML -edicion- como
+    // para las que se agregan despues con el boton "+")
+    function inicializarFila(fila) {
+
+        const tramiteInput = fila.querySelector(".tramite-input");
+        const tramiteHidden = fila.querySelector(".tramite-id-input");
+        const tramiteDropdown = fila.querySelector(".tramite-dropdown");
+        const precioInput = fila.querySelector(".precio-input");
+
+        crearCombobox({
+            input: tramiteInput,
+            hidden: tramiteHidden,
+            dropdown: tramiteDropdown,
+            items: TRAMITES,
+            getLabel: (tramite) => tramite.nombre,
+            getId: (tramite) => tramite.id,
+            // al elegir un tramite se sugiere su precio_base como precio
+            // del servicio; el usuario igual puede editarlo despues
+            onSelect: (tramite) => {
+                precioInput.value = tramite.precio;
+                recalcularTotal();
+            }
+        });
+
+        // cualquier cambio en el precio de esta fila actualiza el total
+        precioInput.addEventListener("input", recalcularTotal);
+
+        // boton de eliminar fila: la quita del DOM y recalcula el total
+        fila.querySelector(".btn-eliminar-fila").addEventListener("click", () => {
+            fila.remove();
+            recalcularTotal();
+        });
+    }
+
+    // agrega una fila nueva y vacia clonando la plantilla <template>
+    function agregarFila() {
+        const fila = plantillaFila.content.firstElementChild.cloneNode(true);
+        contenedorFilas.appendChild(fila);
+        inicializarFila(fila);
+    }
+
+    btnAgregarFila.addEventListener("click", agregarFila);
+
+    // filas que ya existian al cargar la pagina (pedido en edicion): solo
+    // hay que conectarles el combobox y los listeners, no clonarlas
+    contenedorFilas.querySelectorAll(".detalle-row").forEach(inicializarFila);
+
+    // pedido nuevo sin ningun trabajo todavia: se arranca con una fila
+    // vacia para que el usuario no tenga que hacer clic en "+" primero
+    if (contenedorFilas.children.length === 0) {
+        agregarFila();
+    }
+
+    recalcularTotal();
+});

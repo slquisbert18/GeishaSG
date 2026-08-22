@@ -29,66 +29,151 @@
 
             <div class="form-grid">
 
-                <!-- Cliente -->
-                <div class="form-group">
+                <!-- Cliente: combobox -->
+                <div class="form-group combobox">
 
                     <label class="form-label">
-                        Cliente *
+                        Cliente
                     </label>
 
-                    <select
+                    <input
+                            type="text"
+                            id="clienteInput"
                             class="form-control"
-                            th:field="*{cliente}">
+                            placeholder="Escriba para buscar un cliente..."
+                            autocomplete="off"
+                            th:value="${pedido.cliente != null ? pedido.cliente.nombres + ' ' + pedido.cliente.apellidos : ''}">
 
-                        <option value="">
-                            Seleccione un cliente
-                        </option>
+                    <input
+                            type="hidden"
+                            id="clienteHidden"
+                            name="cliente"
+                            th:value="${pedido.cliente != null ? pedido.cliente.id : ''}">
 
-                        <option
-                                th:each="persona : ${clientes}"
-                                th:value="${persona.id}"
-                                th:text="${persona.nombres + ' ' + persona.apellidos}">
-                        </option>
+                    <ul id="clienteDropdown" class="combobox-dropdown"></ul>
 
-                    </select>
+                    <!-- mensaje de error del servidor (si se intento
+                         guardar sin seleccionar un cliente valido) -->
+                    <p id="errorCliente" class="field-error" th:if="${errorCliente}">
+                        Debe seleccionar un cliente de la lista.
+                    </p>
 
                 </div>
 
 
                 <!-- Monto total -->
+                <!-- Monto total: solo lectura, se calcula sumando el
+                     precio de cada trabajo agregado abajo. No tiene
+                     "name": no se envia, el backend recalcula el total
+                     con los precios de cada fila (ver PedidoController) -->
                 <div class="form-group">
 
                     <label class="form-label">
-                        Monto total *
+                        Monto total
                     </label>
+
+                    <input
+                            type="text"
+                            id="montoTotalDisplay"
+                            class="form-control"
+                            th:value="${pedido.montoTotal != null ? pedido.montoTotal : '0.00'}"
+                            readonly>
+
+                </div>
+
+            </div>
+
+            <!-- TRABAJOS DEL PEDIDO (detalle_trabajo) -->
+            <h3>Trabajos</h3>
+
+            <div id="filasTrabajos">
+
+                <!-- filas ya existentes cuando se edita un pedido -->
+                <div class="detalle-row" th:each="detalle : ${pedido.detalles}">
+
+                    <div class="combobox">
+                        <input
+                                type="text"
+                                class="form-control tramite-input"
+                                placeholder="Buscar trámite..."
+                                autocomplete="off"
+                                th:value="${detalle.tramite.nombre}">
+
+                        <input
+                                type="hidden"
+                                class="tramite-id-input"
+                                name="detalleTramiteId"
+                                th:value="${detalle.tramite.id}">
+
+                        <ul class="combobox-dropdown tramite-dropdown"></ul>
+                    </div>
 
                     <input
                             type="number"
                             step="0.01"
                             min="0"
-                            class="form-control"
-                            th:field="*{montoTotal}"
-                            placeholder="0.00">
+                            class="form-control precio-input"
+                            name="detallePrecio"
+                            placeholder="Precio"
+                            th:value="${detalle.precioServicio}">
+
+                    <input
+                            type="text"
+                            class="form-control obs-input"
+                            name="detalleObservaciones"
+                            placeholder="Observaciones (opcional)"
+                            th:value="${detalle.observaciones}">
+
+                    <button type="button" class="btn btn-icon btn-eliminar-fila">
+                        <i class="bi bi-trash"></i>
+                    </button>
 
                 </div>
 
-
-                <!-- Fecha de registro -->
-<!--                <div class="form-group">-->
-
-<!--                    <label class="form-label">-->
-<!--                        Fecha de registro-->
-<!--                    </label>-->
-
-<!--                    <input-->
-<!--                            type="datetime-local"-->
-<!--                            class="form-control"-->
-<!--                            name="fechaRegistro"-->
-<!--                            th:value="${pedido.fechaRegistro != null ? #temporals.format(pedido.fechaRegistro, 'yyyy-MM-dd''T''HH:mm') : ''}">-->
-
-<!--                </div>-->
-
             </div>
+
+            <button type="button" id="btnAgregarTrabajo" class="btn btn-secondary">
+                <i class="bi bi-plus-circle"></i>
+                Agregar trabajo
+            </button>
+
+            <!-- plantilla de una fila vacia: no se muestra en pantalla,
+                 pedido-form.js la clona cada vez que se agrega un trabajo -->
+            <template id="plantillaFilaTrabajo">
+                <div class="detalle-row">
+
+                    <div class="combobox">
+                        <input
+                                type="text"
+                                class="form-control tramite-input"
+                                placeholder="Buscar trámite..."
+                                autocomplete="off">
+
+                        <input type="hidden" class="tramite-id-input" name="detalleTramiteId">
+
+                        <ul class="combobox-dropdown tramite-dropdown"></ul>
+                    </div>
+
+                    <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            class="form-control precio-input"
+                            name="detallePrecio"
+                            placeholder="Precio">
+
+                    <input
+                            type="text"
+                            class="form-control obs-input"
+                            name="detalleObservaciones"
+                            placeholder="Observaciones (opcional)">
+
+                    <button type="button" class="btn btn-icon btn-eliminar-fila">
+                        <i class="bi bi-trash"></i>
+                    </button>
+
+                </div>
+            </template>
 
 
             <div class="form-actions">
@@ -115,6 +200,18 @@
         </form>
 
     </div>
+
+    <!-- datos para los combobox: se generan aqui en JSON (ver
+        PedidoController.agregarDatosDeApoyo) y "pedido-form.js" los usa
+        como arreglos JS listos, sin tener que volver a pedirlos al
+        servidor -->
+    <script th:inline="javascript">
+        const CLIENTES = /*[(${clientesJson})]*/ [];
+        const TRAMITES = /*[(${tramitesJson})]*/ [];
+    </script>
+
+    <script th:src="@{/js/combobox.js}"></script>
+    <script th:src="@{/js/pedido-form.js}"></script>
 
 </section>
 

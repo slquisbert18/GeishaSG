@@ -708,3 +708,60 @@ tbody tr:hover{
     display: inline-flex;
     margin: 0;
 }
+
+/* ===== Combobox (input con busqueda + lista desplegable) ===== */
+.combobox {
+    position: relative;
+}
+
+.combobox-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    margin-top: 4px;
+    max-height: 220px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #DADADA;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+    list-style: none;
+    padding: 4px 0;
+}
+
+.combobox-dropdown.show {
+    display: block;
+}
+
+.combobox-dropdown li {
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.combobox-dropdown li:hover {
+    background: #F5F5F5;
+}
+
+/* ===== Filas de trabajo (detalle_trabajo) del formulario de pedido ===== */
+#filasTrabajos {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.detalle-row {
+    display: grid;
+    /* tramite ocupa mas espacio; precio y observaciones se reparten el resto */
+    grid-template-columns: 2fr 1fr 1.5fr auto;
+    gap: 12px;
+    align-items: start;
+}
+
+#btnAgregarTrabajo {
+    margin-bottom: 24px;
+}
