@@ -14,4 +14,6 @@ public interface PedidoService {
     Pedido guardar(Pedido pedido);
 
     void eliminar(Long id);
+
+    List<Pedido> buscarPorCliente(String buscar);
 }

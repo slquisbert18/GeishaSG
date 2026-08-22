@@ -42,12 +42,21 @@
                     th:action="@{/pedidos}"
                     method="get">
 
-                <input
-                        class="search-box"
-                        type="text"
-                        name="buscar"
-                        th:value="${buscar}"
-                        placeholder="Buscar cliente...">
+                <div class="search-box-wrapper">
+                    <input
+                            class="search-box"
+                            type="text"
+                            name="buscar"
+                            th:value="${buscar}"
+                            placeholder="Buscar cliente...">
+
+                    <a th:if="${buscar != null and !buscar.isEmpty()}"
+                       th:href="@{/pedidos}"
+                       class="btn-icon btn-clear-search"
+                       title="Limpiar búsqueda">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
 
                 <button
                         class="btn btn-primary"
@@ -76,7 +85,7 @@
                 <th>ID</th>
                 <th>Fecha</th>
                 <th>Cliente</th>
-                <th>Empleado</th>
+                <th>Usuario</th>
                 <th>Monto total</th>
                 <th>Acciones</th>
 
@@ -124,7 +133,8 @@
                         <!-- Detalles -->
                         <button
                                 type="button"
-                                class="btn btn-secondary">
+                                class="btn btn-secondary btn-detalle-pedido"
+                                th:attr="data-id=${pedido.id}">
 
                             <i class="bi bi-eye"></i>
                             Detalles

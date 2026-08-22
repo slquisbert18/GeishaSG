@@ -28,22 +28,34 @@
         </div>
 
         <div class="toolbar-right">
+
             <form
                     class="search-form"
                     th:action="@{/tramites}"
                     method="get">
 
-                <input
-                        class="search-box"
-                        type="text"
-                        name="buscar"
-                        th:value="${buscar}"
-                        placeholder="Buscar trámite...">
+                <div class="search-box-wrapper">
+                    <input
+                            class="search-box"
+                            type="text"
+                            name="buscar"
+                            th:value="${buscar}"
+                            placeholder="Buscar tramite...">
+
+                    <a th:if="${buscar != null and !buscar.isEmpty()}"
+                       th:href="@{/tramites}"
+                       class="btn-icon btn-clear-search"
+                       title="Limpiar búsqueda">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
 
                 <button class="btn btn-primary" type="submit">
                     <i class="bi bi-search"></i>
                 </button>
+
             </form>
+
         </div>
 
     </div>

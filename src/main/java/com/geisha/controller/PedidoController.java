@@ -4,15 +4,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.geisha.entity.DetalleTrabajo;
 import com.geisha.entity.Pedido;
+import com.geisha.entity.Persona;
 import com.geisha.entity.Tramite;
+import com.geisha.entity.Usuario;
+import com.geisha.repository.UsuarioRepository;
 import com.geisha.security.UsuarioDetails;
 import com.geisha.service.PedidoService;
 import com.geisha.service.PersonaService;
 import com.geisha.service.TramiteService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.jmx.support.ObjectNameManager;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -22,6 +26,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
@@ -30,13 +35,20 @@ public class PedidoController {
     private final PedidoService pedidoService;
     private final PersonaService personaService;
     private final TramiteService tramiteService;
+    private final UsuarioRepository usuarioRepository;
     private final ObjectMapper objectMapper;
 
     // listar
     @GetMapping("/pedidos")
-    public String listar(Model model) {
+    public String listar(Model model, @RequestParam(required = false) String buscar) {
 
-        model.addAttribute("pedidos", pedidoService.listarTodos());
+        if (buscar != null && !buscar.isBlank()) {
+            model.addAttribute("pedidos", pedidoService.buscarPorCliente(buscar));
+        } else {
+            model.addAttribute("pedidos", pedidoService.listarTodos());
+        }
+
+        model.addAttribute("buscar", buscar);
         model.addAttribute("modulo", "pedidos");
 
         return "pedidos/listar";
@@ -286,6 +298,75 @@ public class PedidoController {
         model.addAttribute("modulo", "pedidos");
 
         return "pedidos/formulario";
+    }
+
+    // detalle completo de un pedido, para el modal de "Detalles" del listado
+    @GetMapping("/pedidos/{id}/detalle")
+    @ResponseBody
+    @Transactional(readOnly = true) // permite leer relaciones lazy (cliente, empleado, detalles) sin cerrar la sesion antes de tiempo
+    public ResponseEntity<Map<String, Object>> obtenerDetalle(@PathVariable Long id) {
+
+        return pedidoService.buscarPorId(id)
+                .map(pedido -> ResponseEntity.ok(mapearDetallePedido(pedido)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    /*
+     * Arma la respuesta JSON del modal de detalle de un pedido. No se
+     * devuelve la entidad Pedido directamente porque aqui necesitamos
+     * combinar datos de varias tablas (el nombre_usuario del empleado no
+     * esta en Persona/Pedido, hay que ir a buscarlo aparte a Usuario) y
+     * evitar mandar relaciones completas que el navegador no necesita.
+     */
+    private Map<String, Object> mapearDetallePedido(Pedido pedido) {
+
+        Map<String, Object> resultado = new LinkedHashMap<>();
+
+        Map<String, Object> datosPedido = new LinkedHashMap<>();
+        datosPedido.put("id", pedido.getId());
+        datosPedido.put("fechaRegistro", pedido.getFechaRegistro());
+        datosPedido.put("montoTotal", pedido.getMontoTotal());
+        resultado.put("pedido", datosPedido);
+
+        resultado.put("cliente", mapearPersona(pedido.getCliente(), false));
+
+        // al empleado si le agregamos su nombre_usuario (dato solo util
+        // para quien administra el sistema, de ahi el pedido original)
+        resultado.put("empleado", mapearPersona(pedido.getEmpleado(), true));
+
+        List<Map<String, Object>> trabajos = pedido.getDetalles().stream()
+                .map(detalle -> {
+                    Map<String, Object> item = new LinkedHashMap<>();
+                    item.put("tramite", detalle.getTramite().getNombre());
+                    item.put("institucion", detalle.getTramite().getInstitucion().getNombre());
+                    item.put("precio", detalle.getPrecioServicio());
+                    item.put("observaciones", detalle.getObservaciones());
+                    return item;
+                })
+                .toList();
+        resultado.put("trabajos", trabajos);
+
+        return resultado;
+    }
+
+    private Map<String, Object> mapearPersona(Persona persona, boolean incluirUsuario) {
+
+        Map<String, Object> item = new LinkedHashMap<>();
+        item.put("nombres", persona.getNombres());
+        item.put("apellidos", persona.getApellidos());
+        item.put("telefono", persona.getTelefono());
+        item.put("correo", persona.getCorreo());
+        item.put("documentoIdentidad", persona.getDocumentoIdentidad());
+
+        if (incluirUsuario) {
+            // no toda Persona tiene una cuenta de Usuario asociada (un
+            // cliente normal no la tiene), por eso es opcional
+            Optional<Usuario> usuario = usuarioRepository.findByPersonaId(persona.getId());
+            item.put("nombreUsuario", usuario.map(Usuario::getNombreUsuario).orElse(null));
+            item.put("rol", usuario.map(Usuario::getRol).orElse(null));
+        }
+
+        return item;
     }
 
     // eliminar

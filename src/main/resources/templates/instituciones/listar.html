@@ -33,12 +33,19 @@
                     th:action="@{/instituciones}"
                     method="get">
 
-                <input
-                        class="search-box"
-                        type="text"
-                        name="nombre"
-                        th:value="${param.nombre}"
-                        placeholder="Buscar institución...">
+                <div class="search-box-wrapper">
+                    <input class="search-box"
+                           type="text"
+                           name="nombre"
+                           th:value="${param.nombre}"
+                           placeholder="Buscar institución...">
+                    <a th:if="${param.nombre != null and !#strings.isEmpty(param.nombre[0])}"
+                       th:href="@{/instituciones}"
+                       class="btn-icon btn-clear-search"
+                       title="Limpiar búsqueda">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
 
                 <button class="btn btn-primary" type="submit">
                     <i class="bi bi-search"></i>

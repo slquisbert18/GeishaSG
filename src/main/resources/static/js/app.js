@@ -520,3 +520,218 @@ document.addEventListener("DOMContentLoaded", () => {
 
     recalcularTotal();
 });
+
+
+/*=======================================================
+        MODAL DE DETALLE DE PEDIDO
+=======================================================*/
+
+// referencias del modal (pueden no existir en paginas sin layout completo,
+// por eso se valida con "if(modalPedido)" mas abajo antes de usarlas)
+const modalPedido = document.getElementById("modalPedido");
+const pedidoSubtitulo = document.getElementById("pedidoSubtitulo");
+const pedidoClienteNombre = document.getElementById("pedidoClienteNombre");
+const pedidoClienteDocumento = document.getElementById("pedidoClienteDocumento");
+const pedidoClienteTelefono = document.getElementById("pedidoClienteTelefono");
+const pedidoClienteCorreo = document.getElementById("pedidoClienteCorreo");
+const pedidoEmpleadoNombre = document.getElementById("pedidoEmpleadoNombre");
+const pedidoEmpleadoUsuario = document.getElementById("pedidoEmpleadoUsuario");
+const pedidoEmpleadoRol = document.getElementById("pedidoEmpleadoRol");
+const pedidoTrabajosLista = document.getElementById("pedidoTrabajosLista");
+const pedidoFecha = document.getElementById("pedidoFecha");
+const pedidoMontoTotal = document.getElementById("pedidoMontoTotal");
+const btnCerrarPedido = document.getElementById("btnCerrarPedido");
+const btnCerrarPedidoSup = document.getElementById("btnCerrarPedidoSup");
+
+function abrirModalPedido() {
+    modalPedido.classList.add("show");
+}
+
+function cerrarModalPedido() {
+    modalPedido.classList.remove("show");
+}
+
+if (modalPedido) {
+    btnCerrarPedido.onclick = cerrarModalPedido;
+    btnCerrarPedidoSup.onclick = cerrarModalPedido;
+}
+
+// muestra un valor o un guion si viene null/undefined (campos opcionales
+// como telefono, correo, observaciones)
+function valorOGuion(valor) {
+    return (valor === null || valor === undefined || valor === "") ? "-" : valor;
+}
+
+// pinta en el modal la respuesta de GET /pedidos/{id}/detalle
+function mostrarDetallePedido(datos) {
+
+    pedidoSubtitulo.textContent = "Pedido #" + datos.pedido.id;
+
+    // cliente
+    pedidoClienteNombre.textContent = datos.cliente.nombres + " " + datos.cliente.apellidos;
+    pedidoClienteDocumento.textContent = valorOGuion(datos.cliente.documentoIdentidad);
+    pedidoClienteTelefono.textContent = valorOGuion(datos.cliente.telefono);
+    pedidoClienteCorreo.textContent = valorOGuion(datos.cliente.correo);
+
+    // quien atendio
+    pedidoEmpleadoNombre.textContent = datos.empleado.nombres + " " + datos.empleado.apellidos;
+    pedidoEmpleadoUsuario.textContent = valorOGuion(datos.empleado.nombreUsuario);
+    pedidoEmpleadoRol.textContent = valorOGuion(datos.empleado.rol);
+
+    // trabajos: se reconstruye la lista completa cada vez que se abre el modal
+    pedidoTrabajosLista.innerHTML = "";
+    datos.trabajos.forEach(trabajo => {
+        const fila = document.createElement("div");
+        fila.className = "pedido-trabajo-item";
+        fila.innerHTML =
+            '<div class="pedido-trabajo-info">' +
+            '<strong>' + trabajo.tramite + '</strong>' +
+            '<span>' + trabajo.institucion + '</span>' +
+            (trabajo.observaciones ? '<span class="pedido-trabajo-obs">' + trabajo.observaciones + '</span>' : '') +
+            '</div>' +
+            '<div class="pedido-trabajo-precio">Bs. ' + Number(trabajo.precio).toFixed(2) + '</div>';
+        pedidoTrabajosLista.appendChild(fila);
+    });
+
+    // fecha: llega como texto ISO ("2026-08-22T10:15:00"), se muestra en
+    // formato local legible
+    const fecha = new Date(datos.pedido.fechaRegistro);
+    pedidoFecha.textContent = fecha.toLocaleString("es-BO", {
+        day: "2-digit", month: "2-digit", year: "numeric",
+        hour: "2-digit", minute: "2-digit"
+    });
+
+    pedidoMontoTotal.textContent = "Bs. " + Number(datos.pedido.montoTotal).toFixed(2);
+
+    abrirModalPedido();
+}
+
+async function cargarDetallePedido(pedidoId) {
+    try {
+        const respuesta = await fetch("/pedidos/" + pedidoId + "/detalle");
+
+        if (!respuesta.ok) {
+            throw new Error("Error al consultar el detalle del pedido");
+        }
+
+        const datos = await respuesta.json();
+        mostrarDetallePedido(datos);
+
+    } catch (error) {
+        console.error(error);
+        mostrarError("No fue posible obtener el detalle del pedido");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".btn-detalle-pedido").forEach(function (boton) {
+        boton.addEventListener("click", function () {
+            cargarDetallePedido(this.dataset.id);
+        });
+    });
+});
+
+
+/*=======================================================
+        MODAL "NUEVO CLIENTE RAPIDO" (desde el formulario de pedido)
+=======================================================*/
+const modalCliente = document.getElementById("modalCliente");
+
+if (modalCliente) {
+
+    const campoNombres = document.getElementById("clienteRapidoNombres");
+    const campoApellidos = document.getElementById("clienteRapidoApellidos");
+    const campoTelefono = document.getElementById("clienteRapidoTelefono");
+    const campoCorreo = document.getElementById("clienteRapidoCorreo");
+    const campoDocumento = document.getElementById("clienteRapidoDocumento");
+
+    // un <p class="field-error"> por cada campo, para mostrar los
+    // mensajes de validacion que devuelve el servidor
+    const camposConError = {
+        nombres: [campoNombres, document.getElementById("errorClienteRapidoNombres")],
+        apellidos: [campoApellidos, document.getElementById("errorClienteRapidoApellidos")],
+        telefono: [campoTelefono, document.getElementById("errorClienteRapidoTelefono")],
+        correo: [campoCorreo, document.getElementById("errorClienteRapidoCorreo")],
+        documentoIdentidad: [campoDocumento, document.getElementById("errorClienteRapidoDocumento")]
+    };
+
+    function limpiarFormularioClienteRapido() {
+        campoNombres.value = "";
+        campoApellidos.value = "";
+        campoTelefono.value = "";
+        campoCorreo.value = "";
+        campoDocumento.value = "";
+        // limpia todos los mensajes de error previos
+        Object.values(camposConError).forEach(([, elementoError]) => {
+            elementoError.textContent = "";
+        });
+    }
+
+    function mostrarErroresClienteRapido(errores) {
+        // primero se limpian los mensajes anteriores, luego se pintan
+        // solo los que vinieron en la respuesta del servidor
+        Object.values(camposConError).forEach(([, elementoError]) => {
+            elementoError.textContent = "";
+        });
+        Object.entries(errores).forEach(([campo, mensaje]) => {
+            if (camposConError[campo]) {
+                camposConError[campo][1].textContent = mensaje;
+            }
+        });
+    }
+
+    document.getElementById("btnNuevoCliente")?.addEventListener("click", () => {
+        limpiarFormularioClienteRapido();
+        modalCliente.classList.add("show");
+    });
+
+    document.getElementById("btnCancelarClienteRapido").addEventListener("click", () => {
+        modalCliente.classList.remove("show");
+    });
+
+    document.getElementById("btnCerrarClienteRapido").addEventListener("click", () => {
+        modalCliente.classList.remove("show");
+    });
+
+    document.getElementById("btnGuardarClienteRapido").addEventListener("click", async () => {
+
+        const persona = {
+            nombres: campoNombres.value.trim(),
+            apellidos: campoApellidos.value.trim(),
+            telefono: campoTelefono.value.trim() || null,
+            correo: campoCorreo.value.trim() || null,
+            documentoIdentidad: campoDocumento.value.trim() || null
+        };
+
+        try {
+            const respuesta = await fetch("/personas/rapido", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(persona)
+            });
+
+            if (!respuesta.ok) {
+                // 400: el cuerpo trae {campo: mensaje} por cada error de validacion
+                const errores = await respuesta.json();
+                mostrarErroresClienteRapido(errores);
+                return;
+            }
+
+            const clienteCreado = await respuesta.json();
+
+            // se agrega a la lista en memoria que usa el combobox, para
+            // que aparezca en futuras busquedas sin recargar la pagina
+            CLIENTES.push(clienteCreado);
+
+            // y queda seleccionado de inmediato en el pedido
+            document.getElementById("clienteInput").value = clienteCreado.nombre;
+            document.getElementById("clienteHidden").value = clienteCreado.id;
+
+            modalCliente.classList.remove("show");
+
+        } catch (error) {
+            console.error(error);
+            mostrarError("No fue posible registrar el cliente");
+        }
+    });
+}

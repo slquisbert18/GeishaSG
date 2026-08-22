@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="modalCliente"
+     id="modalCliente"
+     class="modal-overlay">
+
+    <div class="modal-card modal-cliente">
+
+        <div class="modal-cliente-header">
+
+            <h2>Nuevo cliente</h2>
+
+            <button type="button"
+                    id="btnCerrarClienteRapido"
+                    class="btn-icon">
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
+        </div>
+
+        <p class="modal-cliente-descripcion">
+            Se agregará a la lista de clientes y quedará seleccionado en el pedido.
+        </p>
+
+
+        <div class="modal-cliente-form">
+
+            <!-- Nombre -->
+            <div class="form-group">
+
+                <label class="form-label">
+                    Nombre(s) *
+                </label>
+
+                <input
+                        type="text"
+                        id="clienteRapidoNombres"
+                        class="form-control"
+                        placeholder="Nombre(s)">
+
+                <p
+                        class="field-error"
+                        id="errorClienteRapidoNombres">
+                </p>
+
+            </div>
+
+
+            <!-- Apellido -->
+            <div class="form-group">
+
+                <label class="form-label">
+                    Apellido(s) *
+                </label>
+
+                <input
+                        type="text"
+                        id="clienteRapidoApellidos"
+                        class="form-control"
+                        placeholder="Apellido(s)">
+
+                <p
+                        class="field-error"
+                        id="errorClienteRapidoApellidos">
+                </p>
+
+            </div>
+
+
+            <!-- Teléfono -->
+            <div class="form-group">
+
+                <label class="form-label">
+                    Teléfono
+                </label>
+
+                <input
+                        type="text"
+                        id="clienteRapidoTelefono"
+                        class="form-control"
+                        placeholder="71955249">
+
+                <p
+                        class="field-error"
+                        id="errorClienteRapidoTelefono">
+                </p>
+
+            </div>
+
+
+            <!-- Correo -->
+            <div class="form-group">
+
+                <label class="form-label">
+                    Correo
+                </label>
+
+                <input
+                        type="text"
+                        id="clienteRapidoCorreo"
+                        class="form-control"
+                        placeholder="correo@ejemplo.com">
+
+                <p
+                        class="field-error"
+                        id="errorClienteRapidoCorreo">
+                </p>
+
+            </div>
+
+
+            <!-- Documento -->
+            <div class="form-group full">
+
+                <label class="form-label">
+                    CI
+                </label>
+
+                <input
+                        type="text"
+                        id="clienteRapidoDocumento"
+                        class="form-control"
+                        placeholder="123456789 LP">
+
+                <p
+                        class="field-error"
+                        id="errorClienteRapidoDocumento">
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="modal-cliente-actions">
+
+            <button
+                    type="button"
+                    id="btnCancelarClienteRapido"
+                    class="btn btn-secondary">
+
+                <i class="bi bi-x-circle"></i>
+                Cancelar
+
+            </button>
+
+
+            <button
+                    type="button"
+                    id="btnGuardarClienteRapido"
+                    class="btn btn-primary">
+
+                <i class="bi bi-floppy"></i>
+                Guardar
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+</html>

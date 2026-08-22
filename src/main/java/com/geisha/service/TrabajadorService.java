@@ -8,6 +8,8 @@ public interface TrabajadorService {
 
     List<TrabajadorForm> listarTodos();
 
+    List<TrabajadorForm> buscar(String buscar);
+
     TrabajadorForm buscarPorId(Long id);
 
     void guardar(TrabajadorForm trabajadorForm);

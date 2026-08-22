@@ -436,7 +436,8 @@ tbody tr:hover{
     background: #fff;
 }
 
-.form-section-title{
+.form-section-title,
+.section-title{
     margin-bottom: 10px;
     font-size: 1rem;
     font-weight: 600;
@@ -764,4 +765,171 @@ tbody tr:hover{
 
 #btnAgregarTrabajo {
     margin-bottom: 24px;
+}
+/* ===== Modal de detalle de pedido: lista de trabajos ===== */
+.pedido-trabajos-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pedido-trabajo-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: #F8F8F8;
+    border: 1px solid #E4E4E4;
+    border-radius: 8px;
+}
+
+.pedido-trabajo-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.pedido-trabajo-info strong {
+    font-size: 14px;
+}
+
+.pedido-trabajo-info span {
+    font-size: 12px;
+    color: #666;
+}
+
+.pedido-trabajo-obs {
+    font-style: italic;
+}
+
+.pedido-trabajo-precio {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* fila de monto total, resaltada dentro del modal de detalle */
+.detalle-item.total .detalle-value {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--color-primary);
+    background: #FFF3F3;
+    border-color: #F5C6C6;
+}
+
+/* ===== Boton "limpiar busqueda" (x) dentro del search-box ===== */
+.search-box-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-box-wrapper .search-box {
+    padding-right: 34px;
+}
+
+.btn-clear-search {
+    position: absolute;
+    right: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+/* ===== COMBOBOX + BOTÓN NUEVO CLIENTE ===== */
+
+.combobox-with-button {
+    display: flex;
+    width: 100%;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.combobox-with-button .combobox {
+    flex: 1 1 auto;
+    min-width: 0;
+    position: relative;
+}
+
+.combobox-with-button .form-control {
+    width: 100%;
+}
+
+#btnNuevoCliente {
+    flex: 0 0 auto;
+    width: auto;
+}
+
+/* ===== MODAL NUEVO CLIENTE ===== */
+
+.modal-cliente {
+    width: 700px;
+    max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    text-align: left;
+}
+
+.modal-cliente-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+
+    border-bottom: 2px solid var(--color-primary);
+}
+
+.modal-cliente-header h2 {
+    margin: 0;
+}
+
+.modal-cliente-descripcion {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+
+/* Campos */
+
+.modal-cliente-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modal-cliente-form .form-group {
+    display: grid;
+
+    grid-template-columns: 150px 1fr;
+
+    align-items: center;
+
+    gap: 15px;
+}
+
+.modal-cliente-form .form-label {
+    margin: 0;
+    text-align: right;
+}
+
+.modal-cliente-form .field-error {
+    grid-column: 2;
+    margin-top: -8px;
+}
+
+
+/* Acciones */
+
+.modal-cliente-actions {
+    margin-top: 25px;
+    padding-top: 20px;
+
+    border-top: 1px solid #ECECEC;
+
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
 }

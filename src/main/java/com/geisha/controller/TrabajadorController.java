@@ -18,9 +18,15 @@ public class TrabajadorController {
 
     // LISTAR
     @GetMapping("/trabajadores")
-    public String listar(Model model) {
+    public String listar(Model model, @RequestParam(required = false) String buscar) {
 
-        model.addAttribute("trabajadores", trabajadorService.listarTodos());
+        if (buscar != null && !buscar.isBlank()) {
+            model.addAttribute("trabajadores", trabajadorService.buscar(buscar));
+        } else {
+            model.addAttribute("trabajadores", trabajadorService.listarTodos());
+        }
+
+        model.addAttribute("buscar", buscar);
         model.addAttribute("modulo", "trabajadores");
 
         return "trabajadores/listar";

@@ -26,9 +26,18 @@ public class TrabajadorServiceImpl implements TrabajadorService {
     @Transactional(readOnly = true)
     public List<TrabajadorForm> listarTodos() {
         return usuarioRepository.findAll().stream().map(usuario -> new TrabajadorForm(
-                        usuario.getPersona(),
-                        usuario
-                )).toList();
+                usuario.getPersona(),
+                usuario
+        )).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TrabajadorForm> buscar(String buscar) {
+        return usuarioRepository.buscar(buscar).stream().map(usuario -> new TrabajadorForm(
+                usuario.getPersona(),
+                usuario
+        )).toList();
     }
 
     @Override

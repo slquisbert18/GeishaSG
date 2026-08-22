@@ -34,4 +34,9 @@ public class PedidoServiceImpl implements PedidoService {
     public void eliminar(Long id) {
         pedidoRepository.deleteById(id);
     }
+
+    @Override
+    public List<Pedido> buscarPorCliente(String buscar) {
+        return pedidoRepository.buscarPorCliente(buscar);
+    }
 }

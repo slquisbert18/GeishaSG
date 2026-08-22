@@ -4,11 +4,16 @@ import com.geisha.entity.Persona;
 import com.geisha.service.PersonaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -89,5 +94,41 @@ public class PersonaController {
         personaService.eliminar(id);
         redirectAttributes.addFlashAttribute("mensajeExito", "Persona eliminada correctamente");
         return "redirect:/personas";
+    }
+
+    /*
+     * Alta rapida de cliente desde el modal "+" del formulario de pedido
+     * (ver pedidos/formulario.html). A diferencia de /personas/guardar,
+     * este endpoint no redirige a ninguna vista: responde JSON para que
+     * el modal se cierre sin recargar la pagina y el cliente recien
+     * creado quede seleccionado de inmediato en el combobox.
+     */
+    @PostMapping("/personas/rapido")
+    @ResponseBody
+    public ResponseEntity<?> guardarRapido(@Valid @RequestBody Persona persona, BindingResult result) {
+
+        if (result.hasErrors()) {
+            // mismo formato de error para todos los campos: {campo: mensaje},
+            // asi el JS puede mostrar cada mensaje junto a su input
+            Map<String, String> errores = new LinkedHashMap<>();
+            for (FieldError error : result.getFieldErrors()) {
+                errores.put(error.getField(), error.getDefaultMessage());
+            }
+            return ResponseEntity.badRequest().body(errores);
+        }
+
+        try {
+            Persona guardada = personaService.guardar(persona);
+
+            Map<String, Object> respuesta = new LinkedHashMap<>();
+            respuesta.put("id", guardada.getId());
+            respuesta.put("nombre", guardada.getNombres() + " " + guardada.getApellidos());
+
+            return ResponseEntity.ok(respuesta);
+
+        } catch (RuntimeException ex) {
+            // documento de identidad duplicado (ver PersonaServiceImpl.guardar)
+            return ResponseEntity.badRequest().body(Map.of("documentoIdentidad", ex.getMessage()));
+        }
     }
 }

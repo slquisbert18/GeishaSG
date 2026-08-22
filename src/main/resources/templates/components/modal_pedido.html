@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="modalPedido"
+     id="modalPedido"
+     class="modal-overlay">
+
+    <div class="modal-card modal-foto">
+
+        <!-- encabezado -->
+        <div class="modal-foto-header">
+            <div class="modal-titulos">
+                <h2>
+                    <i class="bi bi-receipt"></i>
+                    Detalle del pedido
+                </h2>
+
+                <p id="pedidoSubtitulo">
+                    Pedido
+                </p>
+            </div>
+
+            <button type="button"
+                    id="btnCerrarPedidoSup"
+                    class="btn-icon">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="modal-foto-body">
+
+            <!-- datos del cliente -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    Cliente
+                </h3>
+
+                <div class="detalle-item">
+                    <span class="detalle-label">Nombre</span>
+                    <span id="pedidoClienteNombre" class="detalle-value"></span>
+                </div>
+
+                <div class="detalle-item">
+                    <span class="detalle-label">Documento</span>
+                    <span id="pedidoClienteDocumento" class="detalle-value"></span>
+                </div>
+
+                <div class="detalle-item">
+                    <span class="detalle-label">Teléfono</span>
+                    <span id="pedidoClienteTelefono" class="detalle-value"></span>
+                </div>
+
+                <div class="detalle-item">
+                    <span class="detalle-label">Correo</span>
+                    <span id="pedidoClienteCorreo" class="detalle-value"></span>
+                </div>
+            </div>
+
+            <!-- quien atendio el pedido -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    Atendido por
+                </h3>
+
+                <div class="detalle-item">
+                    <span class="detalle-label">Nombre</span>
+                    <span id="pedidoEmpleadoNombre" class="detalle-value"></span>
+                </div>
+
+                <div class="detalle-item">
+                    <span class="detalle-label">Usuario</span>
+                    <span id="pedidoEmpleadoUsuario" class="detalle-value"></span>
+                </div>
+
+                <div class="detalle-item">
+                    <span class="detalle-label">Rol</span>
+                    <span id="pedidoEmpleadoRol" class="detalle-value"></span>
+                </div>
+            </div>
+
+            <!-- trabajos incluidos en el pedido -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    Trabajos
+                </h3>
+
+                <!-- pedido-detalle.js inserta aqui una fila por cada
+                     detalle_trabajo que trae el pedido -->
+                <div id="pedidoTrabajosLista" class="pedido-trabajos-lista"></div>
+            </div>
+
+            <!-- resumen: fecha y monto total -->
+            <div class="form-section">
+                <div class="detalle-item">
+                    <span class="detalle-label">Fecha de registro</span>
+                    <span id="pedidoFecha" class="detalle-value"></span>
+                </div>
+
+                <div class="detalle-item total">
+                    <span class="detalle-label">Monto total</span>
+                    <span id="pedidoMontoTotal" class="detalle-value"></span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- botones -->
+        <div class="modal-buttons">
+            <button id="btnCerrarPedido"
+                    class="btn btn-secondary">
+                <i class="bi bi-x-circle"></i>
+                Cerrar
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+</html>
