@@ -3,6 +3,16 @@
 
 <aside class="sidebar" th:fragment="sidebar">
 
+    <!-- Aplica el estado "colapsado" guardado por el usuario ANTES de que
+         se pinte el resto del sidebar. Como cada clic en un item del menu
+         recarga la pagina completa (Thymeleaf renderiza en el servidor),
+         sin esto el sidebar se veria expandido de nuevo en cada navegacion. -->
+    <script>
+        if (localStorage.getItem("sidebarCollapsed") === "1") {
+            document.currentScript.parentElement.classList.add("collapsed");
+        }
+    </script>
+
     <div class="logo">
         <span class="logo-red">■</span>
 

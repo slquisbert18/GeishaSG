@@ -150,20 +150,22 @@
                         <button
                                 type="button"
                                 class="btn btn-secondary btn-detalle-pedido"
+                                title="Detalles"
                                 th:attr="data-id=${pedido.id}">
 
                             <i class="bi bi-eye"></i>
-                            Detalles
+                            <span class="btn-text">Detalles</span>
 
                         </button>
 
                         <!-- Editar -->
                         <a
                                 th:href="@{/pedidos/editar/{id}(id=${pedido.id})}"
-                                class="btn btn-secondary">
+                                class="btn btn-secondary"
+                                title="Editar">
 
                             <i class="bi bi-pencil-square"></i>
-                            Editar
+                            <span class="btn-text">Editar</span>
 
                         </a>
 
@@ -174,10 +176,11 @@
                                 class="btn btn-danger btn-eliminar"
                                 data-url="/pedidos/eliminar"
                                 data-entidad="pedido"
+                                title="Eliminar"
                                 th:attr="data-id=${pedido.id}">
 
                             <i class="bi bi-trash"></i>
-                            Eliminar
+                            <span class="btn-text">Eliminar</span>
 
                         </button>
 

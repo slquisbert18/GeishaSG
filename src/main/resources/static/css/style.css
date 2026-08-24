@@ -33,7 +33,8 @@ body{
 
 .layout{
     display:flex;
-    min-height:100vh;
+    height:100vh;
+    overflow:hidden; /* el layout ya no scrollea completo: solo lo hara .content */
 }
 
 /* SIDEBAR */
@@ -41,10 +42,15 @@ body{
 .sidebar{
     width:var(--sidebar-width);
     min-width: var(--sidebar-width);
+    height:100vh;
+    flex-shrink:0;
+
     background:var(--color-sidebar);
     color:white;
 
-    transition:width .30s ease;
+    overflow-y:auto; /* si el menu creciera, scrollea el mismo sidebar, no la pagina */
+
+    transition:width .30s ease, transform .30s ease;
 }
 
 /* Logo del estudio */
@@ -188,15 +194,20 @@ el menú se reducirá mostrando únicamente los iconos.
 /* CONTENIDO PRINCIPAL   */
 .main{
     flex:1;
+    min-width:0; /* evita que el contenido ancho empuje el layout entero */
 
     display:flex;
     flex-direction:column;
+
+    height:100vh;
+    overflow:hidden; /* el scroll real ocurre dentro de .content */
 }
 
 /* BARRA SUPERIOR */
 
 .topbar{
     height:70px;
+    flex-shrink:0; /* que nunca se comprima ni se mueva */
 
     background:var(--color-topbar);
 
@@ -238,6 +249,14 @@ el menú se reducirá mostrando únicamente los iconos.
 .content{
     flex:1;
     padding:30px;
+    overflow-y:auto; /* AQUI es donde realmente se hace scroll ahora */
+    -webkit-overflow-scrolling:touch;
+}
+
+/* el footer (aunque hoy este vacio) no debe comprimirse si en el
+   futuro se le agrega contenido */
+footer{
+    flex-shrink:0;
 }
 
 /* TABLAS */
@@ -718,7 +737,36 @@ tbody tr:hover{
 .login-card {
     width: 100%;
     max-width: 380px;
+
 }
+
+.login-card h1 {
+    margin-bottom: 10px;
+}
+
+.login-card > p {
+    margin-bottom: 25px;
+    color: #666;
+}
+
+.login-card .form-group {
+    margin-bottom: 18px;
+}
+
+.login-card .form-label {
+    margin-bottom: 8px;
+}
+
+.login-card .btn {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.login-card .mensaje-error,
+.login-card .mensaje-exito {
+    margin-bottom: 18px;
+}
+
 
 .mensaje-error {
     color: #c0392b;
@@ -1203,5 +1251,180 @@ tbody tr:hover{
 @media (max-width: 900px) {
     .estadisticas-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+/* =====================================================
+   RESPONSIVIDAD GENERAL
+   Sidebar y topbar se mantienen fijos siempre; en pantallas
+   angostas el sidebar pasa a ser un panel deslizante (off-canvas)
+   que se superpone al contenido en vez de reducir su ancho.
+===================================================== */
+
+/* Fondo oscuro detras del sidebar cuando esta abierto en movil */
+.sidebar-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.5);
+    z-index:900;
+}
+
+.sidebar-overlay.show{
+    display:block;
+}
+
+@media (max-width: 992px){
+
+    /* El sidebar deja de ocupar espacio en el flex y se posiciona
+       flotando sobre el contenido */
+    .sidebar{
+        position:fixed;
+        top:0;
+        left:0;
+        z-index:1000;
+        transform:translateX(-100%);
+        box-shadow:4px 0 20px rgba(0,0,0,.25);
+    }
+
+    .sidebar.mobile-open{
+        transform:translateX(0);
+    }
+
+    /* En movil el boton del menu abre/cierra el panel completo,
+       asi que el modo "collapsed" (solo iconos) no aplica aqui */
+    .sidebar.collapsed{
+        width:var(--sidebar-width);
+        min-width:var(--sidebar-width);
+    }
+
+    .sidebar.collapsed .logo-full,
+    .sidebar.collapsed span{
+        display:inline;
+    }
+
+    .sidebar.collapsed .logo-short{
+        display:none;
+    }
+
+    .sidebar.collapsed .logo{
+        justify-content:center;
+    }
+
+    .sidebar.collapsed li,
+    .sidebar.collapsed a{
+        justify-content:flex-start;
+        padding:16px 25px;
+    }
+
+    .topbar{
+        padding:0 15px;
+    }
+
+    .content{
+        padding:20px;
+    }
+}
+
+@media (max-width: 768px){
+
+    /* Formularios: una sola columna en vez de dos */
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .detalle-row{
+        grid-template-columns:1fr;
+    }
+
+    .detalle-row-header{
+        display:none; /* los titulos de columna no tienen sentido apilados */
+    }
+
+    .modal-cliente-form .form-group{
+        grid-template-columns:1fr;
+        gap:6px;
+    }
+
+    .modal-cliente-form .form-label{
+        text-align:left;
+    }
+
+    .modal-cliente-form .field-error{
+        grid-column:1;
+    }
+
+    .notificacion-datos{
+        grid-template-columns:1fr;
+    }
+
+    .detalle-grid{
+        grid-template-columns:1fr;
+    }
+
+    /* Barra de herramientas de los listados: todo a ancho completo */
+    .toolbar-left,
+    .toolbar-right,
+    .search-form{
+        width:100%;
+    }
+
+    .search-box{
+        width:100%;
+        flex:1;
+    }
+
+    /* Las tablas ya no rompen el layout: aparece scroll horizontal */
+    .table-container{
+        overflow-x:auto;
+    }
+
+    table{
+        min-width:600px;
+    }
+
+    /* En pantallas chicas ocultamos el nombre de usuario para dejar
+       espacio a la campanita y al boton de logout */
+    .topbar-username{
+        display:none;
+    }
+
+    .dropdown-campanita{
+        width:260px;
+        right:-70px;
+    }
+}
+
+@media (max-width: 480px){
+
+    .modal-card,
+    .modal-foto,
+    .modal-cliente{
+        width:95%;
+        padding:20px;
+    }
+
+    .page-title{
+        font-size:24px;
+    }
+}
+
+/* =====================================================
+   BOTONES DE ACCIÓN DE LOS CRUD (editar, eliminar, detalles...)
+   Debajo de este ancho ya no entran comodas 2-4 acciones con
+   texto en cada fila, asi que se muestran solo los iconos.
+===================================================== */
+@media (max-width: 770px){
+
+    .table-actions .btn-text{
+        display:none;
+    }
+
+    .table-actions .btn{
+        padding:10px 12px;
+    }
+
+    .table-actions{
+        flex-wrap:wrap;
     }
 }

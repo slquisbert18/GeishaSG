@@ -100,10 +100,11 @@
                     <div class="table-actions">
                         <a
                                 th:href="@{/instituciones/editar/{id}(id=${institucion.id})}"
-                                class="btn btn-secondary">
+                                class="btn btn-secondary"
+                                title="Editar">
 
                             <i class="bi bi-pencil-square"></i>
-                            Editar
+                            <span class="btn-text">Editar</span>
                         </a>
 
                         <button
@@ -111,11 +112,12 @@
                                 class="btn btn-danger btn-eliminar"
                                 data-url="/instituciones/eliminar"
                                 data-entidad="institución"
+                                title="Eliminar"
                                 th:attr="
                                     data-id=${institucion.id},
                                     data-nombre=${institucion.nombre}">
                             <i class="bi bi-trash"></i>
-                            Eliminar
+                            <span class="btn-text">Eliminar</span>
                         </button>
                     </div>
                 </td>

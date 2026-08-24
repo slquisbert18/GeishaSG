@@ -33,7 +33,7 @@
 
         <!-- sec:authentication="name" toma el username del usuario logueado
              (viene de UsuarioDetails.getUsername(), o sea nombre_usuario) -->
-        <span sec:authentication="name">Usuario</span>
+        <span class="topbar-username" sec:authentication="name">Usuario</span>
 
         <form th:action="@{/logout}" method="post" class="logout-form">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>

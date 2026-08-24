@@ -123,10 +123,11 @@
 
                         <a
                                 th:href="@{/tramites/editar/{id}(id=${tramite.id})}"
-                                class="btn btn-secondary">
+                                class="btn btn-secondary"
+                                title="Editar">
 
                             <i class="bi bi-pencil-square"></i>
-                            Editar
+                            <span class="btn-text">Editar</span>
                         </a>
 
                         <button
@@ -134,9 +135,10 @@
                                 class="btn btn-danger btn-eliminar"
                                 data-url="/tramites/eliminar"
                                 data-entidad="trámite"
+                                title="Eliminar"
                                 th:attr="data-id=${tramite.id}, data-nombre=${tramite.nombre}">
                             <i class="bi bi-trash"></i>
-                            Eliminar
+                            <span class="btn-text">Eliminar</span>
                         </button>
 
                     </div>

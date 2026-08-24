@@ -31,16 +31,68 @@ Más adelante también contendrá:
 =======================================================*/
 const sidebar = document.querySelector(".sidebar");
 const btnMenu = document.getElementById("btnMenu");
-// Contrae o expande el menú lateral
+const sidebarOverlay = document.getElementById("sidebarOverlay");
+
+// A partir de este ancho el sidebar deja de "empujar" el contenido
+// y pasa a ser un panel deslizante que se superpone (ver style.css)
+const MOBILE_BREAKPOINT = 992;
+
+function esMovil(){
+    return window.innerWidth <= MOBILE_BREAKPOINT;
+}
+
+function cerrarSidebarMovil(){
+    sidebar.classList.remove("mobile-open");
+    if(sidebarOverlay){
+        sidebarOverlay.classList.remove("show");
+    }
+}
+
+// Contrae/expande el menú (escritorio) o lo abre/cierra como panel (móvil)
 if(btnMenu){
 
     btnMenu.addEventListener("click",function(){
 
-        sidebar.classList.toggle("collapsed");
+        if(esMovil()){
+            sidebar.classList.toggle("mobile-open");
+            if(sidebarOverlay){
+                sidebarOverlay.classList.toggle("show");
+            }
+        }else{
+            sidebar.classList.toggle("collapsed");
+            // Se recuerda la preferencia para que, al navegar a otra
+            // pagina (recarga completa), el sidebar siga colapsado
+            localStorage.setItem(
+                "sidebarCollapsed",
+                sidebar.classList.contains("collapsed") ? "1" : "0"
+            );
+        }
 
     });
 
 }
+
+// Tocar el fondo oscuro cierra el sidebar (solo aplica en móvil)
+if(sidebarOverlay){
+    sidebarOverlay.addEventListener("click", cerrarSidebarMovil);
+}
+
+// Al elegir una opción del menú en móvil, se cierra el panel
+document.querySelectorAll(".sidebar a").forEach(function(enlace){
+    enlace.addEventListener("click", function(){
+        if(esMovil()){
+            cerrarSidebarMovil();
+        }
+    });
+});
+
+// Si la ventana pasa de móvil a escritorio (o viceversa) al
+// redimensionar, se limpian los estados para no dejar clases sueltas
+window.addEventListener("resize", function(){
+    if(!esMovil()){
+        cerrarSidebarMovil();
+    }
+});
 
 
 // REFERENCIAS DEL MODAL

@@ -121,10 +121,11 @@
 
                     <div class="table-actions">
                         <a th:href="@{/trabajadores/editar/{id}(id=${trabajador.usuario.id})}"
-                           class="btn btn-secondary">
+                           class="btn btn-secondary"
+                           title="Editar">
 
                             <i class="bi bi-pencil-square"></i>
-                            Editar
+                            <span class="btn-text">Editar</span>
 
                         </a>
 
@@ -133,11 +134,12 @@
                                 class="btn btn-danger btn-eliminar"
                                 data-url="/trabajadores/eliminar"
                                 data-entidad="trabajador"
+                                title="Eliminar"
                                 th:attr="data-id=${trabajador.usuario.id},
                                          data-nombre=${trabajador.persona.nombres + ' ' + trabajador.persona.apellidos}">
 
                             <i class="bi bi-trash"></i>
-                            Eliminar
+                            <span class="btn-text">Eliminar</span>
 
                         </button>
 
@@ -177,4 +179,3 @@
 </body>
 
 </html>
-
