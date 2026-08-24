@@ -4,6 +4,7 @@ import com.geisha.entity.EspecificacionFotografica;
 import com.geisha.entity.Institucion;
 import com.geisha.entity.Tramite;
 import com.geisha.exception.NombreDuplicadoException;
+import com.geisha.pdf.PdfService;
 import com.geisha.service.EspecificacionFotograficaService;
 import com.geisha.service.InstitucionService;
 import com.geisha.service.TramiteService;
@@ -16,12 +17,16 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+import java.util.Optional;
+
 @Controller
 @RequiredArgsConstructor
 public class TramiteController {
     private final TramiteService tramiteService;
     private final InstitucionService institucionService;
     private final EspecificacionFotograficaService efService;
+    private final PdfService pdfService;
 
     // LISTAR
     @GetMapping("/tramites")
@@ -162,5 +167,25 @@ public class TramiteController {
     public ResponseEntity<EspecificacionFotografica> obtenerEspecificacion(@PathVariable Long id){
         return efService.buscarPorTramite(id).map(ResponseEntity::ok).
                 orElseGet(()->ResponseEntity.notFound().build());
+    }
+
+    // exporta el listado completo de tramites a PDF (boton "Imprimir")
+    @GetMapping("/tramites/pdf")
+    public ResponseEntity<byte[]> exportarPdf() {
+
+        List<String> encabezados = List.of("Nombre", "Institución", "Precio base", "Activo", "Descripción");
+
+        List<List<String>> filas = tramiteService.listarTodos().stream()
+                .map(tramite -> List.of(
+                        tramite.getNombre(),
+                        tramite.getInstitucion() != null ? tramite.getInstitucion().getNombre() : "-",
+                        tramite.getPrecioBase() != null ? "Bs. " + tramite.getPrecioBase() : "-",
+                        Boolean.TRUE.equals(tramite.getActivo()) ? "Sí" : "No",
+                        Optional.ofNullable(tramite.getDescripcion()).orElse("-")
+                ))
+                .toList();
+
+        byte[] pdf = pdfService.generarListado("Trámites", encabezados, filas);
+        return pdfService.responder(pdf, "tramites.pdf");
     }
 }

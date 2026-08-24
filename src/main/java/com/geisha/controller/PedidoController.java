@@ -7,6 +7,7 @@ import com.geisha.entity.Pedido;
 import com.geisha.entity.Persona;
 import com.geisha.entity.Tramite;
 import com.geisha.entity.Usuario;
+import com.geisha.pdf.PdfService;
 import com.geisha.repository.UsuarioRepository;
 import com.geisha.security.UsuarioDetails;
 import com.geisha.service.PedidoService;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,6 +39,7 @@ public class PedidoController {
     private final TramiteService tramiteService;
     private final UsuarioRepository usuarioRepository;
     private final ObjectMapper objectMapper;
+    private final PdfService pdfService;
 
     // listar
     @GetMapping("/pedidos")
@@ -367,6 +370,74 @@ public class PedidoController {
         }
 
         return item;
+    }
+
+    // exporta el listado completo de pedidos a PDF (boton "Imprimir")
+    @GetMapping("/pedidos/pdf")
+    public ResponseEntity<byte[]> exportarPdf() {
+
+        List<String> encabezados = List.of("N°", "Cliente", "Atendido por", "Fecha", "Monto total");
+        DateTimeFormatter formatoFecha = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+        List<List<String>> filas = pedidoService.listarTodos().stream()
+                .map(pedido -> List.of(
+                        String.valueOf(pedido.getId()),
+                        pedido.getCliente().getNombres() + " " + pedido.getCliente().getApellidos(),
+                        pedido.getEmpleado().getNombres() + " " + pedido.getEmpleado().getApellidos(),
+                        pedido.getFechaRegistro().format(formatoFecha),
+                        "Bs. " + pedido.getMontoTotal()
+                ))
+                .toList();
+
+        byte[] pdf = pdfService.generarListado("Pedidos", encabezados, filas);
+        return pdfService.responder(pdf, "pedidos.pdf");
+    }
+
+    // exporta el detalle de UN pedido a PDF, con la misma informacion que
+    // ya arma mapearDetallePedido() para el modal de "Detalles" del listado
+    @GetMapping("/pedidos/{id}/pdf")
+    @Transactional(readOnly = true) // permite leer relaciones lazy (cliente, empleado, detalles)
+    public ResponseEntity<byte[]> exportarDetallePdf(@PathVariable Long id) {
+
+        Pedido pedido = pedidoService.buscarPorId(id).orElseThrow();
+        DateTimeFormatter formatoFecha = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+        Persona cliente = pedido.getCliente();
+        Persona empleado = pedido.getEmpleado();
+        String nombreUsuarioEmpleado = usuarioRepository.findByPersonaId(empleado.getId())
+                .map(Usuario::getNombreUsuario)
+                .orElse("-");
+
+        List<PdfService.SeccionDetalle> secciones = new ArrayList<>();
+
+        secciones.add(new PdfService.SeccionDetalle("Cliente", List.of(
+                new String[]{"Nombre", cliente.getNombres() + " " + cliente.getApellidos()},
+                new String[]{"Documento", cliente.getDocumentoIdentidad()},
+                new String[]{"Teléfono", cliente.getTelefono()},
+                new String[]{"Correo", cliente.getCorreo()}
+        )));
+
+        secciones.add(new PdfService.SeccionDetalle("Atendido por", List.of(
+                new String[]{"Nombre", empleado.getNombres() + " " + empleado.getApellidos()},
+                new String[]{"Usuario", nombreUsuarioEmpleado}
+        )));
+
+        // una fila por cada trabajo del pedido
+        List<String[]> filasTrabajos = pedido.getDetalles().stream()
+                .map(detalle -> new String[]{
+                        detalle.getTramite().getNombre() + " (" + detalle.getTramite().getInstitucion().getNombre() + ")",
+                        "Bs. " + detalle.getPrecioServicio() + (detalle.getObservaciones() != null ? " - " + detalle.getObservaciones() : "")
+                })
+                .toList();
+        secciones.add(new PdfService.SeccionDetalle("Trabajos", filasTrabajos));
+
+        secciones.add(new PdfService.SeccionDetalle("Resumen", List.of(
+                new String[]{"Fecha de registro", pedido.getFechaRegistro().format(formatoFecha)},
+                new String[]{"Monto total", "Bs. " + pedido.getMontoTotal()}
+        )));
+
+        byte[] pdf = pdfService.generarDetalle("Pedido #" + pedido.getId(), secciones);
+        return pdfService.responder(pdf, "pedido-" + pedido.getId() + ".pdf");
     }
 
     // eliminar

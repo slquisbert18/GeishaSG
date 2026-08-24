@@ -2,13 +2,18 @@ package com.geisha.controller;
 
 import com.geisha.entity.Institucion;
 import com.geisha.exception.NombreDuplicadoException;
+import com.geisha.pdf.PdfService;
 import com.geisha.service.InstitucionService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
+import java.util.Optional;
 
 /*
  * Un Controller recibe las peticiones del navegador.
@@ -22,12 +27,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class InstitucionController {
 
     private final InstitucionService institucionService;
+    private final PdfService pdfService;
 
     /*
      * Spring inyecta automáticamente el servicio.
      */
-    public InstitucionController(InstitucionService institucionService) {
+    public InstitucionController(InstitucionService institucionService, PdfService pdfService) {
         this.institucionService = institucionService;
+        this.pdfService = pdfService;
     }
 
     /*
@@ -158,5 +165,26 @@ public class InstitucionController {
         );
 
         return "redirect:/instituciones";
+    }
+
+    // exporta el listado completo de instituciones a PDF (boton "Imprimir")
+    @GetMapping("/instituciones/pdf")
+    public ResponseEntity<byte[]> exportarPdf() {
+
+        List<String> encabezados = List.of("Nombre", "Dirección", "Teléfono", "Correo", "Horario", "Página web");
+
+        List<List<String>> filas = institucionService.listarTodas().stream()
+                .map(institucion -> List.of(
+                        institucion.getNombre(),
+                        Optional.ofNullable(institucion.getDireccion()).orElse("-"),
+                        Optional.ofNullable(institucion.getTelefono()).orElse("-"),
+                        Optional.ofNullable(institucion.getCorreo()).orElse("-"),
+                        Optional.ofNullable(institucion.getHorario()).orElse("-"),
+                        Optional.ofNullable(institucion.getPaginaWeb()).orElse("-")
+                ))
+                .toList();
+
+        byte[] pdf = pdfService.generarListado("Instituciones", encabezados, filas);
+        return pdfService.responder(pdf, "instituciones.pdf");
     }
 }

@@ -1,20 +1,25 @@
 package com.geisha.controller;
 
 import com.geisha.dto.TrabajadorForm;
+import com.geisha.pdf.PdfService;
 import com.geisha.service.TrabajadorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
 public class TrabajadorController {
 
     private final TrabajadorService trabajadorService;
+    private final PdfService pdfService;
 
     // LISTAR
     @GetMapping("/trabajadores")
@@ -130,5 +135,27 @@ public class TrabajadorController {
         );
 
         return "redirect:/trabajadores";
+    }
+
+    // exporta el listado completo de usuarios a PDF (boton "Imprimir").
+    // Al estar bajo /trabajadores/** ya queda restringido solo a
+    // ADMINISTRADOR por la regla que definimos en SecurityConfig.
+    @GetMapping("/trabajadores/pdf")
+    public ResponseEntity<byte[]> exportarPdf() {
+
+        List<String> encabezados = List.of("Nombres", "Apellidos", "Usuario", "Rol", "Activo");
+
+        List<List<String>> filas = trabajadorService.listarTodos().stream()
+                .map(form -> List.of(
+                        form.getPersona().getNombres(),
+                        form.getPersona().getApellidos(),
+                        form.getUsuario().getNombreUsuario(),
+                        form.getUsuario().getRol(),
+                        Boolean.TRUE.equals(form.getUsuario().getActivo()) ? "Sí" : "No"
+                ))
+                .toList();
+
+        byte[] pdf = pdfService.generarListado("Usuarios", encabezados, filas);
+        return pdfService.responder(pdf, "usuarios.pdf");
     }
 }

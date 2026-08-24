@@ -32,6 +32,14 @@
 
             </a>
 
+
+            <a th:href="@{/pedidos/pdf}"
+               target="_blank"
+               class="btn btn-secondary"
+               title="Imprimir / exportar PDF">
+                <i class="bi bi-printer"></i>
+                Imprimir
+            </a>
         </div>
 
 
@@ -129,6 +137,14 @@
 
                     <div class="table-actions">
 
+                        <!-- PDF del detalle de este pedido puntual -->
+                        <a
+                                th:href="@{/pedidos/{id}/pdf(id=${pedido.id})}"
+                                target="_blank"
+                                class="btn-icon-pdf"
+                                title="Exportar este pedido a PDF">
+                            <i class="bi bi-file-earmark-pdf"></i>
+                        </a>
 
                         <!-- Detalles -->
                         <button
@@ -140,7 +156,6 @@
                             Detalles
 
                         </button>
-
 
                         <!-- Editar -->
                         <a

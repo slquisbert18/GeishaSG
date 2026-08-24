@@ -53,6 +53,13 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
+        <!-- Generacion de PDFs (listados e "impresion" de detalle de cada registro) -->
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>1.3.42</version>
+        </dependency>
+
         <!-- Permite usar sec:authorize en las plantillas Thymeleaf para
             mostrar/ocultar elementos segun el rol del usuario logueado -->
         <dependency>

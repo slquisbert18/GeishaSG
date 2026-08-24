@@ -1,6 +1,7 @@
 package com.geisha.controller;
 
 import com.geisha.entity.Persona;
+import com.geisha.pdf.PdfService;
 import com.geisha.service.PersonaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,13 +13,17 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
 public class PersonaController {
     private final PersonaService personaService;
+    private final PdfService pdfService;
 
     // listar
     @GetMapping("/personas")
@@ -94,6 +99,29 @@ public class PersonaController {
         personaService.eliminar(id);
         redirectAttributes.addFlashAttribute("mensajeExito", "Persona eliminada correctamente");
         return "redirect:/personas";
+    }
+
+    // exporta el listado completo de clientes a PDF (boton "Imprimir")
+    @GetMapping("/personas/pdf")
+    public ResponseEntity<byte[]> exportarPdf() {
+
+        List<String> encabezados = List.of("Nombres", "Apellidos", "Documento", "Teléfono", "Correo", "Fecha de nacimiento");
+
+        List<List<String>> filas = personaService.listarClientes().stream()
+                .map(persona -> List.of(
+                        persona.getNombres(),
+                        persona.getApellidos(),
+                        Optional.ofNullable(persona.getDocumentoIdentidad()).orElse("-"),
+                        Optional.ofNullable(persona.getTelefono()).orElse("-"),
+                        Optional.ofNullable(persona.getCorreo()).orElse("-"),
+                        persona.getFechaNacimiento() != null
+                                ? persona.getFechaNacimiento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                                : "-"
+                ))
+                .toList();
+
+        byte[] pdf = pdfService.generarListado("Clientes", encabezados, filas);
+        return pdfService.responder(pdf, "clientes.pdf");
     }
 
     /*

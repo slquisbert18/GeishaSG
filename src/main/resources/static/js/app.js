@@ -704,9 +704,20 @@ if (modalCliente) {
         };
 
         try {
+            // Spring Security exige este token en todo POST/PUT/DELETE.
+            // Los <form> normales lo mandan solos; en un fetch() hay que
+            // leerlo de los meta tags (ver layout/head.html) y agregarlo
+            // a mano en los headers. Sin esto, Spring Security responde
+            // 403 sin cuerpo JSON legible, por eso el boton "no hacia nada".
+            const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
             const respuesta = await fetch("/personas/rapido", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    [csrfHeader]: csrfToken
+                },
                 body: JSON.stringify(persona)
             });
 

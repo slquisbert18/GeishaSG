@@ -598,6 +598,30 @@ tbody tr:hover{
     transition: .2s;
 }
 
+.btn-icon-pdf {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    border-radius: 8px;
+    color: var(--color-primary);
+    background: #FFF3F3;
+    border: 1px solid #F5C6C6;
+    text-decoration: none;
+    cursor: pointer;
+    transition: .20s;
+}
+
+.btn-icon-pdf:hover {
+    background: var(--color-primary);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-icon-pdf i {
+    font-size: 18px;
+}
+
 .btn-icon:hover {
     color: #000;
 }
@@ -1159,4 +1183,25 @@ tbody tr:hover{
 .sin-pedidos {
     font-size: 13px;
     color: #999;
+}
+
+/* ===== Dashboard de estadisticas ===== */
+.estadisticas-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.estadisticas-grid .form-section.full {
+    grid-column: 1 / -1;
+}
+
+.estadisticas-grid canvas {
+    max-height: 320px;
+}
+
+@media (max-width: 900px) {
+    .estadisticas-grid {
+        grid-template-columns: 1fr;
+    }
 }
