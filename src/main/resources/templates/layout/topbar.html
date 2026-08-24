@@ -10,9 +10,26 @@
 
     <div class="topbar-right">
 
-        <button>
-            <i class="bi bi-bell"></i>
-        </button>
+        <div class="notificaciones-campanita">
+
+            <button id="btnCampanita">
+                <i class="bi bi-bell"></i>
+                <span id="badgeCampanita" class="badge-campanita" style="display:none;"></span>
+            </button>
+
+            <div id="dropdownCampanita" class="dropdown-campanita">
+                <div class="dropdown-campanita-header">
+                    Cumpleaños próximos
+                </div>
+                <div id="listaCampanita" class="dropdown-campanita-lista">
+                    <!-- app.js llena esto con GET /notificaciones/resumen -->
+                </div>
+                <a th:href="@{/notificaciones}" class="dropdown-campanita-footer">
+                    Ver todas
+                </a>
+            </div>
+
+        </div>
 
         <!-- sec:authentication="name" toma el username del usuario logueado
              (viene de UsuarioDetails.getUsername(), o sea nombre_usuario) -->

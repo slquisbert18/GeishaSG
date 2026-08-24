@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<head>
+    <title>Estadísticas</title>
+</head>
+
+<body>
+
+<section layout:fragment="contenido">
+
+    <h1 class="page-title">
+        Estadísticas
+    </h1>
+
+    <div class="estadisticas-grid">
+
+        <div class="form-section">
+            <h3 class="form-section-title">Ventas por mes</h3>
+            <canvas id="graficoVentas"></canvas>
+        </div>
+
+        <div class="form-section">
+            <h3 class="form-section-title">Trámites más solicitados</h3>
+            <canvas id="graficoTramites"></canvas>
+        </div>
+
+        <div class="form-section full">
+            <h3 class="form-section-title">Instituciones con más demanda</h3>
+            <canvas id="graficoInstituciones"></canvas>
+        </div>
+
+    </div>
+
+    <!-- Chart.js: solo se necesita en esta pagina, por eso se carga aqui
+         y no en el layout general -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+
+    <script th:inline="javascript">
+        // colores del tema, reutilizados en los 3 graficos para que se
+        // vean consistentes con el resto de la app
+        const COLOR_PRIMARIO = "#C62828";
+        const COLOR_PALETA = ["#C62828", "#E57373", "#8D6E63", "#5D4037", "#EF9A9A", "#4E342E", "#D84315", "#BF360C", "#FF8A65", "#A1887F"];
+
+        async function cargarEstadisticas() {
+            const respuesta = await fetch("/estadisticas/datos");
+            const datos = await respuesta.json();
+
+            // ===== ventas por mes (linea) =====
+            new Chart(document.getElementById("graficoVentas"), {
+                type: "line",
+                data: {
+                    labels: Object.keys(datos.ventasPorMes),
+                    datasets: [{
+                        label: "Bs.",
+                        data: Object.values(datos.ventasPorMes),
+                        borderColor: COLOR_PRIMARIO,
+                        backgroundColor: "rgba(198,40,40,.1)",
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: { responsive: true }
+            });
+
+            // ===== tramites mas solicitados (barras) =====
+            new Chart(document.getElementById("graficoTramites"), {
+                type: "bar",
+                data: {
+                    labels: Object.keys(datos.tramitesMasSolicitados),
+                    datasets: [{
+                        label: "Trabajos realizados",
+                        data: Object.values(datos.tramitesMasSolicitados),
+                        backgroundColor: COLOR_PRIMARIO
+                    }]
+                },
+                options: { responsive: true, indexAxis: "y" }
+            });
+
+            // ===== instituciones con mas demanda (dona) =====
+            new Chart(document.getElementById("graficoInstituciones"), {
+                type: "doughnut",
+                data: {
+                    labels: Object.keys(datos.institucionesConMasDemanda),
+                    datasets: [{
+                        data: Object.values(datos.institucionesConMasDemanda),
+                        backgroundColor: COLOR_PALETA
+                    }]
+                },
+                options: { responsive: true }
+            });
+        }
+
+        cargarEstadisticas();
+    </script>
+
+</section>
+
+</body>
+
+</html>

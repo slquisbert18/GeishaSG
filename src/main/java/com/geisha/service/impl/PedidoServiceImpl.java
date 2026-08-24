@@ -39,4 +39,9 @@ public class PedidoServiceImpl implements PedidoService {
     public List<Pedido> buscarPorCliente(String buscar) {
         return pedidoRepository.buscarPorCliente(buscar);
     }
+
+    @Override
+    public List<Pedido> historialCliente(Long clienteId) {
+        return pedidoRepository.findByClienteIdOrderByFechaRegistroDesc(clienteId);
+    }
 }

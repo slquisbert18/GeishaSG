@@ -751,8 +751,7 @@ tbody tr:hover{
 #filasTrabajos {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 10px;
 }
 
 .detalle-row {
@@ -761,10 +760,56 @@ tbody tr:hover{
     grid-template-columns: 2fr 1fr 1.5fr auto;
     gap: 12px;
     align-items: start;
+    padding: 14px;
+    border: 1px solid #E4E4E4;
+    border-radius: 8px;
+    background: #FAFAFA;
+}
+
+/* fila de titulos de columna: mismas proporciones que .detalle-row para
+   que todo quede alineado, pero sin el fondo/borde de tarjeta */
+.detalle-row-header {
+    padding: 0 14px;
+    margin-bottom: 4px;
+    background: none;
+    border: none;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: #999;
+}
+
+/* encabezado de la seccion "Trabajos": titulo a la izquierda, boton de
+   agregar a la derecha, en la misma linea */
+.trabajos-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.trabajos-header .form-section-title {
+    margin-bottom: 0;
+}
+
+/* campo de monto total: se resalta porque es el dato mas importante del
+   formulario y es de solo lectura (se calcula solo) */
+.monto-total-input {
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--color-primary);
+    background: #FFF3F3;
+    border-color: #F5C6C6;
+    cursor: default;
+}
+
+.detalle-row .btn-eliminar-fila {
+    align-self: center;
 }
 
 #btnAgregarTrabajo {
-    margin-bottom: 24px;
+    flex-shrink: 0;
 }
 /* ===== Modal de detalle de pedido: lista de trabajos ===== */
 .pedido-trabajos-lista {
@@ -932,4 +977,186 @@ tbody tr:hover{
     display: flex;
     justify-content: flex-end;
     gap: 12px;
+}
+
+/* ===== Campanita de notificaciones (topbar) ===== */
+.notificaciones-campanita {
+    position: relative;
+}
+
+.badge-campanita {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: var(--color-primary);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dropdown-campanita {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 300px;
+    background: white;
+    border: 1px solid #E4E4E4;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .12);
+    z-index: 30;
+    overflow: hidden;
+}
+
+.dropdown-campanita.show {
+    display: block;
+}
+
+.dropdown-campanita-header {
+    padding: 12px 16px;
+    font-weight: 600;
+    color: black;
+    border-bottom: 1px solid #EEE;
+}
+
+.dropdown-campanita-lista {
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.dropdown-campanita-item {
+    display: flex;
+    color: black;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-bottom: 1px solid #F2F2F2;
+    font-size: 13px;
+}
+
+.dropdown-campanita-item strong{
+    color: var(--color-text);
+}
+
+.dropdown-campanita-vacio {
+    padding: 20px 16px;
+    text-align: center;
+    color: #888;
+    font-size: 13px;
+}
+
+.dropdown-campanita-footer {
+    display: block;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--color-primary);
+    border-top: 1px solid #EEE;
+}
+
+.dropdown-campanita-footer:hover {
+    background: #F8F8F8;
+}
+
+/* ===== Pagina de notificaciones ===== */
+.page-subtitle {
+    color: #777;
+    margin-top: -18px;
+    margin-bottom: 25px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.empty-state i {
+    font-size: 40px;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.notificaciones-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.notificacion-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+    padding: 20px;
+}
+
+.notificacion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.notificacion-cliente {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.notificacion-cliente i {
+    font-size: 22px;
+    color: var(--color-primary);
+}
+
+.notificacion-cliente div {
+    display: flex;
+    flex-direction: column;
+}
+
+.notificacion-fecha {
+    font-size: 12px;
+    color: #888;
+}
+
+.badge-cumpleanos {
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: #F0F0F0;
+    color: #555;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badge-cumpleanos.hoy {
+    background: #FFF3F3;
+    color: var(--color-primary);
+}
+
+.notificacion-datos {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.notificacion-historial h4 {
+    font-size: 13px;
+    color: #777;
+    margin-bottom: 8px;
+}
+
+.sin-pedidos {
+    font-size: 13px;
+    color: #999;
 }

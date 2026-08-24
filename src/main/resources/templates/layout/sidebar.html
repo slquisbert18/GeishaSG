@@ -57,10 +57,17 @@
                 </a>
             </li>
 
-            <li th:classappend="${modulo == 'reportes'} ? 'active'">
-                <a href="#">
+            <li th:classappend="${modulo == 'notificaciones'} ? 'active'">
+                <a th:href="@{/notificaciones}">
+                    <i class="bi bi-bell"></i>
+                    <span>Notificaciones</span>
+                </a>
+            </li>
+
+            <li th:classappend="${modulo == 'estadisticas'} ? 'active'">
+                <a th:href="@{/estadisticas}">
                     <i class="bi bi-graph-up"></i>
-                    <span>Reportes</span>
+                    <span>Estadísticas</span>
                 </a>
             </li>
 

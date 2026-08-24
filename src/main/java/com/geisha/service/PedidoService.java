@@ -16,4 +16,6 @@ public interface PedidoService {
     void eliminar(Long id);
 
     List<Pedido> buscarPorCliente(String buscar);
+
+    List<Pedido> historialCliente(Long clienteId);
 }

@@ -10,6 +10,13 @@
         Geisha
     </title>
 
+    <!-- token anti-CSRF: los <form> normales ya lo mandan solos
+         (Spring inyecta un input oculto via th:action), pero las llamadas
+         fetch() como la del modal de cliente rapido no pasan por eso y
+         necesitan leerlo desde aqui para agregarlo manualmente -->
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+
     <!-- CSS -->
 
     <link

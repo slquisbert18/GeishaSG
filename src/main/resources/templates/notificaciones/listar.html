@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<head>
+    <title>Notificaciones</title>
+</head>
+
+<body>
+
+<section layout:fragment="contenido">
+
+    <h1 class="page-title">
+        Notificaciones
+    </h1>
+
+    <p class="page-subtitle">
+        Cumpleaños de clientes en los próximos 30 días
+    </p>
+
+    <!-- sin cumpleanos proximos -->
+    <div class="empty-state" th:if="${#lists.isEmpty(cumpleanos)}">
+        <i class="bi bi-calendar-check"></i>
+        <p>No hay cumpleaños próximos en los siguientes 30 días.</p>
+    </div>
+
+    <div class="notificaciones-lista">
+
+        <div class="notificacion-card" th:each="cp : ${cumpleanos}">
+
+            <div class="notificacion-header">
+
+                <div class="notificacion-cliente">
+                    <i class="bi bi-gift"></i>
+                    <div>
+                        <strong th:text="${cp.persona.nombres + ' ' + cp.persona.apellidos}"></strong>
+                        <span
+                                class="notificacion-fecha"
+                                th:text="${#temporals.format(cp.persona.fechaNacimiento, 'dd/MM')}">
+                        </span>
+                    </div>
+                </div>
+
+                <!-- "Hoy" si diasRestantes es 0, si no "En N dias" -->
+                <span class="badge-cumpleanos" th:classappend="${cp.diasRestantes == 0} ? 'hoy'">
+                    <span th:if="${cp.diasRestantes == 0}">Hoy</span>
+                    <span th:unless="${cp.diasRestantes == 0}" th:text="'En ' + ${cp.diasRestantes} + ' días'"></span>
+                </span>
+
+            </div>
+
+            <div class="notificacion-datos">
+                <div class="detalle-item">
+                    <span class="detalle-label">Teléfono</span>
+                    <span class="detalle-value" th:text="${cp.persona.telefono ?: '-'}"></span>
+                </div>
+                <div class="detalle-item">
+                    <span class="detalle-label">Correo</span>
+                    <span class="detalle-value" th:text="${cp.persona.correo ?: '-'}"></span>
+                </div>
+                <div class="detalle-item">
+                    <span class="detalle-label">Documento</span>
+                    <span class="detalle-value" th:text="${cp.persona.documentoIdentidad ?: '-'}"></span>
+                </div>
+            </div>
+
+            <!-- historial de pedidos de este cliente -->
+            <div class="notificacion-historial">
+
+                <h4>Pedidos anteriores</h4>
+
+                <p class="sin-pedidos"
+                   th:if="${#lists.isEmpty(historialPorCliente.get(cp.persona.id))}">
+                    Este cliente todavía no tiene pedidos registrados.
+                </p>
+
+                <div class="pedido-trabajo-item" th:each="pedido : ${historialPorCliente.get(cp.persona.id)}">
+                    <div class="pedido-trabajo-info">
+                        <strong th:text="'Pedido #' + ${pedido.id}"></strong>
+                        <span th:text="${#temporals.format(pedido.fechaRegistro, 'dd/MM/yyyy HH:mm')}"></span>
+                    </div>
+                    <div class="pedido-trabajo-precio" th:text="'Bs. ' + ${#numbers.formatDecimal(pedido.montoTotal, 1, 2)}"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+</body>
+
+</html>

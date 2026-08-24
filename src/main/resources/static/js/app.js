@@ -735,3 +735,65 @@ if (modalCliente) {
         }
     });
 }
+
+
+/*=======================================================
+        CAMPANITA DE NOTIFICACIONES (cumpleanos proximos)
+=======================================================*/
+const btnCampanita = document.getElementById("btnCampanita");
+
+if (btnCampanita) {
+
+    const badgeCampanita = document.getElementById("badgeCampanita");
+    const dropdownCampanita = document.getElementById("dropdownCampanita");
+    const listaCampanita = document.getElementById("listaCampanita");
+
+    async function cargarNotificaciones() {
+        try {
+            const respuesta = await fetch("/notificaciones/resumen");
+            if (!respuesta.ok) return;
+
+            const cumpleanos = await respuesta.json();
+
+            // contador sobre la campana: se oculta si no hay nada pendiente
+            if (cumpleanos.length > 0) {
+                badgeCampanita.textContent = cumpleanos.length;
+                badgeCampanita.style.display = "flex";
+            } else {
+                badgeCampanita.style.display = "none";
+            }
+
+            // lista del dropdown
+            listaCampanita.innerHTML = "";
+            if (cumpleanos.length === 0) {
+                listaCampanita.innerHTML = '<div class="dropdown-campanita-vacio">Sin cumpleaños próximos</div>';
+                return;
+            }
+
+            cumpleanos.forEach(item => {
+                const fila = document.createElement("div");
+                fila.className = "dropdown-campanita-item";
+                const cuando = item.diasRestantes === 0 ? "Hoy" : "En " + item.diasRestantes + " días";
+                fila.innerHTML = "<span>" + item.nombre + "</span><strong>" + cuando + "</strong>";
+                listaCampanita.appendChild(fila);
+            });
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    btnCampanita.addEventListener("click", (evento) => {
+        evento.stopPropagation();
+        dropdownCampanita.classList.toggle("show");
+    });
+
+    // clic fuera del dropdown: lo cierra
+    document.addEventListener("click", (evento) => {
+        if (!dropdownCampanita.contains(evento.target) && !btnCampanita.contains(evento.target)) {
+            dropdownCampanita.classList.remove("show");
+        }
+    });
+
+    cargarNotificaciones();
+}
