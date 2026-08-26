@@ -18,6 +18,18 @@
         Pedidos
     </h1>
 
+    <p class="page-subtitle">
+        <span th:if="${fecha != null and fecha.isEqual(T(java.time.LocalDate).now())}">
+            Pedidos de hoy
+        </span>
+        <span th:if="${fecha != null and !fecha.isEqual(T(java.time.LocalDate).now())}"
+              th:text="'Pedidos del ' + ${#temporals.format(fecha, 'dd/MM/yyyy')}">
+        </span>
+        <span th:if="${fecha == null}">
+            Mostrando pedidos de todos los días
+        </span>
+    </p>
+
 
     <!-- Barra de herramientas -->
     <div class="toolbar">
@@ -33,7 +45,7 @@
             </a>
 
 
-            <a th:href="@{/pedidos/pdf}"
+            <a th:href="@{/pedidos/pdf(fecha=${fecha}, buscar=${buscar})}"
                target="_blank"
                class="btn btn-secondary"
                title="Imprimir / exportar PDF">
@@ -50,6 +62,16 @@
                     th:action="@{/pedidos}"
                     method="get">
 
+                <!-- sin fecha en la URL, el controlador asume "hoy" (ver
+                     PedidoController.listar); este input siempre manda un
+                     valor explicito una vez que el usuario lo toca -->
+                <input
+                        type="date"
+                        name="fecha"
+                        class="form-control"
+                        th:value="${fecha}"
+                        title="Filtrar por fecha">
+
                 <div class="search-box-wrapper">
                     <input
                             class="search-box"
@@ -59,7 +81,7 @@
                             placeholder="Buscar cliente...">
 
                     <a th:if="${buscar != null and !buscar.isEmpty()}"
-                       th:href="@{/pedidos}"
+                       th:href="@{/pedidos(fecha=${fecha})}"
                        class="btn-icon btn-clear-search"
                        title="Limpiar búsqueda">
                         <i class="bi bi-x-lg"></i>
@@ -73,6 +95,16 @@
                     <i class="bi bi-search"></i>
 
                 </button>
+
+                <!-- quita el filtro de fecha (manda fecha vacio a
+                     proposito, para no caer de nuevo en el "hoy" por
+                     defecto) y deja ver pedidos de cualquier dia -->
+                <a th:if="${fecha != null}"
+                   th:href="@{/pedidos(fecha='', buscar=${buscar})}"
+                   class="btn btn-secondary"
+                   title="Quitar el filtro de fecha">
+                    Ver todos los días
+                </a>
 
             </form>
 

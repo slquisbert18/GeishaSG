@@ -18,5 +18,8 @@ public interface TramiteService {
     void eliminar(Long id);
 
     // Busca trámites por nombre
-    List<Tramite> buscarPorNombre(String nombre);
+    // List<Tramite> buscarPorNombre(String nombre);
+
+    // Busca trámites por nombre
+    List<Tramite> buscarPorInstitucion(String nombreInstitucion);
 }

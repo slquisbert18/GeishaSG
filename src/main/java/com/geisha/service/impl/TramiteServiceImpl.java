@@ -57,7 +57,7 @@ public class TramiteServiceImpl implements TramiteService {
     }
 
     @Override
-    public List<Tramite> buscarPorNombre(String nombre) {
-        return tramiteRepository.findByNombreContainingIgnoreCase(nombre);
+    public List<Tramite> buscarPorInstitucion(String nombreInstitucion) {
+        return tramiteRepository.findByInstitucion_NombreContainingIgnoreCase(nombreInstitucion);
     }
 }

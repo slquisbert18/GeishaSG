@@ -140,11 +140,11 @@
                 </h3>
 
                 <div class="form-grid">
-<!--                    codigo_rgb VARCHAR(20),-->
-<!--                    codigo_hex VARCHAR(10),-->
-<!--                    resolucion SMALLINT,-->
-<!--                    margen NUMERIC(5,2),-->
-<!--                    observaciones TEXT,-->
+                    <!--                    codigo_rgb VARCHAR(20),-->
+                    <!--                    codigo_hex VARCHAR(10),-->
+                    <!--                    resolucion SMALLINT,-->
+                    <!--                    margen NUMERIC(5,2),-->
+                    <!--                    observaciones TEXT,-->
 
                     <!-- CODIGO RGB-->
                     <div class="form-group">
@@ -153,6 +153,7 @@
                         </label>
 
                         <input type="text"
+                               id="inputCodigoRgb"
                                class="form-control"
                                th:field="*{codigoRgb}"
                                placeholder="255,255,255">
@@ -170,6 +171,7 @@
                         </label>
 
                         <input type="text"
+                               id="inputCodigoHex"
                                class="form-control"
                                th:field="*{codigoHex}"
                                placeholder="#FFFFFF">
@@ -224,10 +226,10 @@
                         </label>
 
                         <textarea
-                               rows="4"
-                               class="form-control"
-                               th:field="*{observaciones}"
-                               placeholder="Observaciones adicionales">
+                                rows="4"
+                                class="form-control"
+                                th:field="*{observaciones}"
+                                placeholder="Observaciones adicionales">
                         </textarea>
 
                         <div class="field-error"

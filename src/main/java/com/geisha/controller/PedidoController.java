@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -43,15 +44,31 @@ public class PedidoController {
 
     // listar
     @GetMapping("/pedidos")
-    public String listar(Model model, @RequestParam(required = false) String buscar) {
+    public String listar(Model model,
+                         @RequestParam(required = false) String buscar,
+                         @RequestParam(required = false) String fecha) {
 
-        if (buscar != null && !buscar.isBlank()) {
-            model.addAttribute("pedidos", pedidoService.buscarPorCliente(buscar));
+        /*
+         * Comportamiento del filtro de fecha:
+         * - "fecha" no viene en la URL (primera vez que se abre la
+         *   pagina) -> se asume HOY. Asi el listado nace "en blanco" cada
+         *   jornada, sin tener que crear nada a mano.
+         * - "fecha" viene vacia (el usuario le dio al boton de limpiar) ->
+         *   se quita el filtro y se ven los pedidos de todos los dias.
+         * - "fecha" viene con un valor -> se filtra exactamente ese dia.
+         */
+        LocalDate fechaFiltro;
+        if (fecha == null) {
+            fechaFiltro = LocalDate.now();
+        } else if (fecha.isBlank()) {
+            fechaFiltro = null;
         } else {
-            model.addAttribute("pedidos", pedidoService.listarTodos());
+            fechaFiltro = LocalDate.parse(fecha);
         }
 
+        model.addAttribute("pedidos", pedidoService.filtrar(fechaFiltro, buscar));
         model.addAttribute("buscar", buscar);
+        model.addAttribute("fecha", fechaFiltro);
         model.addAttribute("modulo", "pedidos");
 
         return "pedidos/listar";
@@ -374,12 +391,16 @@ public class PedidoController {
 
     // exporta el listado completo de pedidos a PDF (boton "Imprimir")
     @GetMapping("/pedidos/pdf")
-    public ResponseEntity<byte[]> exportarPdf() {
+    public ResponseEntity<byte[]> exportarPdf(@RequestParam(required = false) String buscar,
+                                              @RequestParam(required = false) String fecha) {
+
+        // mismo criterio de "fecha" que en listar(): sin parametro = hoy
+        LocalDate fechaFiltro = (fecha == null) ? LocalDate.now() : (fecha.isBlank() ? null : LocalDate.parse(fecha));
 
         List<String> encabezados = List.of("N°", "Cliente", "Atendido por", "Fecha", "Monto total");
         DateTimeFormatter formatoFecha = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-        List<List<String>> filas = pedidoService.listarTodos().stream()
+        List<List<String>> filas = pedidoService.filtrar(fechaFiltro, buscar).stream()
                 .map(pedido -> List.of(
                         String.valueOf(pedido.getId()),
                         pedido.getCliente().getNombres() + " " + pedido.getCliente().getApellidos(),
@@ -389,7 +410,11 @@ public class PedidoController {
                 ))
                 .toList();
 
-        byte[] pdf = pdfService.generarListado("Pedidos", encabezados, filas);
+        String titulo = fechaFiltro != null
+                ? "Pedidos del " + fechaFiltro.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                : "Pedidos";
+
+        byte[] pdf = pdfService.generarListado(titulo, encabezados, filas);
         return pdfService.responder(pdf, "pedidos.pdf");
     }
 

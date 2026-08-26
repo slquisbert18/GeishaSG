@@ -33,7 +33,7 @@ public class TramiteController {
     public String listar(Model model, @RequestParam(required = false) String buscar) {
 
         if (buscar != null && !buscar.isBlank()) {
-            model.addAttribute("tramites", tramiteService.buscarPorNombre(buscar));
+            model.addAttribute("tramites", tramiteService.buscarPorInstitucion(buscar));
         } else {
             model.addAttribute("tramites", tramiteService.listarTodos());
         }

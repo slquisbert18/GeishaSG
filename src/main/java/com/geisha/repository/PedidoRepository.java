@@ -5,18 +5,37 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
-    // pedidos cuyo cliente coincide con el texto buscado (nombre o apellido)
+
+    /*
+     * Consulta unica y flexible para el listado de pedidos: cada
+     * criterio es opcional (si el parametro llega null, esa condicion se
+     * ignora gracias al "OR :param IS NULL"). Esto permite combinar el
+     * filtro de fecha con la busqueda por cliente, o usar solo uno de
+     * los dos, sin escribir una consulta distinta por cada combinacion.
+     *
+     * fechaInicio/fechaFin delimitan un dia completo (00:00 a 00:00 del
+     * dia siguiente); "buscar" compara contra nombre o apellido del cliente.
+     */
     @Query("""
         SELECT p
         FROM Pedido p
         JOIN p.cliente c
-        WHERE LOWER(c.nombres) LIKE LOWER(CONCAT('%', :buscar, '%'))
-           OR LOWER(c.apellidos) LIKE LOWER(CONCAT('%', :buscar, '%'))
+        WHERE (:fechaInicio IS NULL OR p.fechaRegistro >= :fechaInicio)
+          AND (:fechaFin IS NULL OR p.fechaRegistro < :fechaFin)
+          AND (:buscar IS NULL
+               OR LOWER(c.nombres) LIKE LOWER(CONCAT('%', :buscar, '%'))
+               OR LOWER(c.apellidos) LIKE LOWER(CONCAT('%', :buscar, '%')))
+        ORDER BY p.fechaRegistro DESC
         """)
-    List<Pedido> buscarPorCliente(@Param("buscar") String buscar);
+    List<Pedido> filtrar(
+            @Param("fechaInicio") LocalDateTime fechaInicio,
+            @Param("fechaFin") LocalDateTime fechaFin,
+            @Param("buscar") String buscar
+    );
 
     // historial de pedidos de un cliente puntual (para la notificacion de cumpleanos)
     List<Pedido> findByClienteIdOrderByFechaRegistroDesc(Long clienteId);

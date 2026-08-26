@@ -860,3 +860,29 @@ if (btnCampanita) {
 
     cargarNotificaciones();
 }
+
+
+/*=======================================================
+        AUTOCOMPLETAR FORMATO DE CODIGO RGB / HEX
+=======================================================*/
+
+// al hacer foco en un input vacio, se inserta el caracter que arranca el
+// formato ("(" para rgb, "#" para hex) y el cursor queda justo despues,
+// listo para que el usuario escriba los valores sin tener que teclear
+// el simbolo el mismo
+function autocompletarFormato(input, plantilla) {
+    if (!input) return;
+
+    input.addEventListener("focus", () => {
+        if (input.value.trim() === "") {
+            input.value = plantilla;
+            const posicion = input.value.length;
+            input.setSelectionRange(posicion, posicion);
+        }
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    autocompletarFormato(document.getElementById("inputCodigoRgb"), "(");
+    autocompletarFormato(document.getElementById("inputCodigoHex"), "#");
+});
