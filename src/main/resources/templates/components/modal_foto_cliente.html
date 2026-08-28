@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="modalFotoCliente"
+     id="modalFotoCliente"
+     class="modal-overlay">
+
+    <div class="modal-card modal-foto">
+
+        <!-- encabezado -->
+        <div class="modal-foto-header">
+            <div class="modal-titulos">
+                <h2>
+                    <i class="bi bi-image"></i>
+                    Foto de referencia
+                </h2>
+
+                <p id="fotoClienteSubtitulo">
+                    Cliente
+                </p>
+            </div>
+
+            <button type="button"
+                    id="btnCerrarFotoClienteSup"
+                    class="btn-icon">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="modal-foto-body">
+
+            <!-- se muestra cuando el cliente SI tiene una foto cargada -->
+            <div id="fotoClienteContenido">
+                <img id="fotoClienteImagen"
+                     src=""
+                     alt="Foto de referencia del cliente"
+                     class="foto-cliente-preview">
+            </div>
+
+            <!-- se muestra cuando el cliente todavia no tiene ninguna foto -->
+            <div id="fotoClienteVacio" style="display: none;">
+                <img src="/img/sinContenido.jpg"
+                     alt="Sin foto"
+                     class="foto-empty-image">
+                <h3>
+                    Este cliente todavía no tiene una foto de referencia cargada
+                </h3>
+            </div>
+
+        </div>
+
+        <!-- botones -->
+        <div class="modal-buttons">
+
+            <button id="btnAbrirUbicacionFoto"
+                    class="btn btn-secondary">
+                <i class="bi bi-folder2-open"></i>
+                Abrir ubicación
+            </button>
+
+            <button id="btnCerrarFotoCliente"
+                    class="btn btn-secondary">
+                <i class="bi bi-x-circle"></i>
+                Cerrar
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+</html>

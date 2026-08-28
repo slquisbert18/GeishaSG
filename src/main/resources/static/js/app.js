@@ -544,6 +544,42 @@ document.addEventListener("DOMContentLoaded", () => {
         // cualquier cambio en el precio de esta fila actualiza el total
         precioInput.addEventListener("input", recalcularTotal);
 
+        // boton "Examinar...": abre el explorador de archivos NATIVO del
+        // servidor (ver aviso en PedidoController.seleccionarArchivo) y
+        // autocompleta el campo de ruta de esta fila con lo elegido
+        const btnExaminar = fila.querySelector(".btn-examinar-ruta");
+        const rutaInput = fila.querySelector(".ruta-input");
+
+        btnExaminar.addEventListener("click", async () => {
+
+            const iconoOriginal = btnExaminar.innerHTML;
+            btnExaminar.disabled = true;
+            btnExaminar.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+
+            try {
+                const respuesta = await fetch("/pedidos/seleccionar-archivo");
+
+                if (!respuesta.ok) {
+                    const datos = await respuesta.json().catch(() => ({}));
+                    mostrarError(datos.error || "No se pudo abrir el explorador de archivos");
+                    return;
+                }
+
+                const datos = await respuesta.json();
+                if (datos.ruta) {
+                    rutaInput.value = datos.ruta;
+                }
+                // si datos.ruta viene null, el usuario cerro el dialogo
+                // sin elegir nada: no se toca el campo
+            } catch (error) {
+                console.error(error);
+                mostrarError("No se pudo abrir el explorador de archivos");
+            } finally {
+                btnExaminar.disabled = false;
+                btnExaminar.innerHTML = iconoOriginal;
+            }
+        });
+
         // boton de eliminar fila: la quita del DOM y recalcula el total
         fila.querySelector(".btn-eliminar-fila").addEventListener("click", () => {
             fila.remove();
@@ -641,6 +677,11 @@ function mostrarDetallePedido(datos) {
             '<span>' + trabajo.institucion + '</span>' +
             (trabajo.observaciones ? '<span class="pedido-trabajo-obs">' + trabajo.observaciones + '</span>' : '') +
             '</div>' +
+            (trabajo.tieneImagen
+                ? '<button type="button" class="btn btn-secondary btn-ver-trabajo-imagen" ' +
+                'data-id="' + trabajo.id + '" data-tramite="' + trabajo.tramite + '">' +
+                '<i class="bi bi-image"></i><span class="btn-text">Ver imagen</span></button>'
+                : '') +
             '<div class="pedido-trabajo-precio">Bs. ' + Number(trabajo.precio).toFixed(2) + '</div>';
         pedidoTrabajosLista.appendChild(fila);
     });
@@ -673,6 +714,58 @@ async function cargarDetallePedido(pedidoId) {
         console.error(error);
         mostrarError("No fue posible obtener el detalle del pedido");
     }
+}
+
+
+/*=======================================================
+        MODAL "IMAGEN DEL TRABAJO REALIZADO" (dentro del
+        modal de detalle de pedido, un boton por cada trabajo)
+=======================================================*/
+const modalFotoTrabajo = document.getElementById("modalFotoTrabajo");
+
+if (modalFotoTrabajo && pedidoTrabajosLista) {
+
+    const fotoTrabajoSubtitulo = document.getElementById("fotoTrabajoSubtitulo");
+    const fotoTrabajoImagen = document.getElementById("fotoTrabajoImagen");
+    const fotoTrabajoError = document.getElementById("fotoTrabajoError");
+    const btnCerrarFotoTrabajo = document.getElementById("btnCerrarFotoTrabajo");
+    const btnCerrarFotoTrabajoSup = document.getElementById("btnCerrarFotoTrabajoSup");
+
+    function abrirModalFotoTrabajo(detalleTrabajoId, nombreTramite) {
+        fotoTrabajoSubtitulo.textContent = nombreTramite;
+        fotoTrabajoError.style.display = "none";
+        fotoTrabajoImagen.style.display = "";
+        // "?" + timestamp evita que el navegador muestre una version
+        // vieja en cache si el archivo fue reemplazado recientemente
+        fotoTrabajoImagen.src = "/detalle-trabajo/" + detalleTrabajoId + "/imagen?t=" + Date.now();
+
+        modalFotoTrabajo.classList.add("show");
+    }
+
+    function cerrarModalFotoTrabajo() {
+        modalFotoTrabajo.classList.remove("show");
+        fotoTrabajoImagen.src = "";
+    }
+
+    // se define en el scope global porque el atributo onerror="" del
+    // <img> (en modal_foto_trabajo.html) la referencia directamente
+    window.mostrarErrorFotoTrabajo = function () {
+        fotoTrabajoImagen.style.display = "none";
+        fotoTrabajoError.style.display = "";
+    };
+
+    btnCerrarFotoTrabajo.onclick = cerrarModalFotoTrabajo;
+    btnCerrarFotoTrabajoSup.onclick = cerrarModalFotoTrabajo;
+
+    // delegacion de eventos: la lista de trabajos se redibuja cada vez
+    // que se abre el modal de detalle, asi que no tiene caso enganchar
+    // un listener por boton; se escucha una sola vez en el contenedor
+    pedidoTrabajosLista.addEventListener("click", (evento) => {
+        const boton = evento.target.closest(".btn-ver-trabajo-imagen");
+        if (boton) {
+            abrirModalFotoTrabajo(boton.dataset.id, boton.dataset.tramite);
+        }
+    });
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -886,3 +979,90 @@ document.addEventListener("DOMContentLoaded", () => {
     autocompletarFormato(document.getElementById("inputCodigoRgb"), "(");
     autocompletarFormato(document.getElementById("inputCodigoHex"), "#");
 });
+
+
+/*=======================================================
+        MODAL "FOTO DE REFERENCIA" DEL CLIENTE (listado de clientes)
+=======================================================*/
+const modalFotoCliente = document.getElementById("modalFotoCliente");
+
+if (modalFotoCliente) {
+
+    const fotoClienteSubtitulo = document.getElementById("fotoClienteSubtitulo");
+    const fotoClienteContenido = document.getElementById("fotoClienteContenido");
+    const fotoClienteImagen = document.getElementById("fotoClienteImagen");
+    const fotoClienteVacio = document.getElementById("fotoClienteVacio");
+    const btnAbrirUbicacionFoto = document.getElementById("btnAbrirUbicacionFoto");
+    const btnCerrarFotoCliente = document.getElementById("btnCerrarFotoCliente");
+    const btnCerrarFotoClienteSup = document.getElementById("btnCerrarFotoClienteSup");
+
+    // se recuerda el id del cliente que esta abierto actualmente, para
+    // saber a quien pertenece la foto cuando se pide "abrir ubicacion"
+    let clienteFotoActualId = null;
+
+    function abrirModalFotoCliente(id, nombre, nombreArchivo) {
+
+        clienteFotoActualId = id;
+        fotoClienteSubtitulo.textContent = nombre;
+
+        const tieneFoto = !!nombreArchivo;
+
+        fotoClienteContenido.style.display = tieneFoto ? "" : "none";
+        fotoClienteVacio.style.display = tieneFoto ? "none" : "";
+        btnAbrirUbicacionFoto.style.display = tieneFoto ? "" : "none";
+
+        if (tieneFoto) {
+            fotoClienteImagen.src = "/fotos-clientes/" + encodeURIComponent(nombreArchivo);
+        }
+
+        modalFotoCliente.classList.add("show");
+    }
+
+    function cerrarModalFotoCliente() {
+        modalFotoCliente.classList.remove("show");
+        fotoClienteImagen.src = "";
+        clienteFotoActualId = null;
+    }
+
+    btnCerrarFotoCliente.onclick = cerrarModalFotoCliente;
+    btnCerrarFotoClienteSup.onclick = cerrarModalFotoCliente;
+
+    document.querySelectorAll(".btn-ver-foto").forEach(function (boton) {
+        boton.addEventListener("click", function () {
+            abrirModalFotoCliente(
+                this.dataset.id,
+                this.dataset.nombre,
+                this.dataset.foto
+            );
+        });
+    });
+
+    btnAbrirUbicacionFoto.addEventListener("click", async () => {
+
+        if (!clienteFotoActualId) return;
+
+        try {
+            const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+            const respuesta = await fetch("/personas/" + clienteFotoActualId + "/foto/ubicacion", {
+                method: "POST",
+                headers: {
+                    [csrfHeader]: csrfToken
+                }
+            });
+
+            if (!respuesta.ok) {
+                const datos = await respuesta.json().catch(() => ({}));
+                mostrarError(datos.mensaje || "No se pudo abrir la ubicación del archivo");
+                return;
+            }
+
+            // la ventana del explorador se abre en el equipo donde corre
+            // el servidor; aqui no hay nada mas que mostrar en pantalla
+        } catch (error) {
+            console.error(error);
+            mostrarError("No se pudo abrir la ubicación del archivo");
+        }
+    });
+}

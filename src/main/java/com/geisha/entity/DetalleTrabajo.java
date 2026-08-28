@@ -33,4 +33,17 @@ public class DetalleTrabajo {
     @ManyToOne
     @JoinColumn(name = "id_tramite", nullable = false)
     private Tramite tramite;
+
+    /*
+     * Ruta del archivo con el trabajo final ya realizado
+     * Se guarda tal como el usuario la escribe o la
+     * elige con el explorador nativo (ver PedidoController), asi que
+     * puede ser una ruta absoluta de Windows como
+     * "C:\Fotos\pedido15_carnet.jpg". Al ser una ruta libre (no un
+     * archivo gestionado por el sistema), esta funcion depende de que
+     * el archivo siga existiendo en esa ubicacion en el equipo donde
+     * corre el servidor.
+     */
+    @Column(name = "ruta", length = 500)
+    private String ruta;
 }

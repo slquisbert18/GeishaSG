@@ -698,6 +698,49 @@ tbody tr:hover{
     color: #666;
 }
 
+/* mismo estado "vacio" reutilizado en el modal de foto de cliente */
+#fotoClienteVacio{
+    text-align: center;
+}
+
+#fotoClienteVacio h3{
+    margin-top: 10px;
+    color: #666;
+    font-weight: 500;
+}
+
+.foto-cliente-preview{
+    display: block;
+    max-width: 100%;
+    max-height: 60vh;
+    margin: 0 auto;
+    border-radius: 10px;
+    object-fit: contain;
+}
+
+/* vista previa chica de la foto ya cargada, dentro del formulario de cliente */
+.foto-actual-preview{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    padding: 8px;
+    background: #f7f7f7;
+    border-radius: 8px;
+}
+
+.foto-actual-preview img{
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.foto-actual-preview span{
+    font-size: .85rem;
+    color: #666;
+}
+
 #fotoSubtitulo{
     margin-top: 3px;
     margin-bottom: 0;
@@ -829,14 +872,30 @@ tbody tr:hover{
 
 .detalle-row {
     display: grid;
-    /* tramite ocupa mas espacio; precio y observaciones se reparten el resto */
-    grid-template-columns: 2fr 1fr 1.5fr auto;
+    /* tramite ocupa mas espacio; precio, observaciones y ruta se reparten el resto */
+    grid-template-columns: 1.6fr .8fr 1.2fr 1.6fr auto;
     gap: 12px;
     align-items: start;
     padding: 14px;
     border: 1px solid #E4E4E4;
     border-radius: 8px;
     background: #FAFAFA;
+}
+
+/* input de ruta + boton "Examinar" dentro de una fila de trabajo */
+.input-with-button {
+    display: flex;
+    gap: 6px;
+}
+
+.input-with-button .form-control {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.input-with-button .btn {
+    flex: 0 0 auto;
+    padding: 8px 12px;
 }
 
 /* fila de titulos de columna: mismas proporciones que .detalle-row para
@@ -893,6 +952,7 @@ tbody tr:hover{
 
 .pedido-trabajo-item {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     gap: 12px;
@@ -900,6 +960,10 @@ tbody tr:hover{
     background: #F8F8F8;
     border: 1px solid #E4E4E4;
     border-radius: 8px;
+}
+
+.btn-ver-trabajo-imagen {
+    flex-shrink: 0;
 }
 
 .pedido-trabajo-info {

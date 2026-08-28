@@ -10,10 +10,15 @@ import com.geisha.entity.Usuario;
 import com.geisha.pdf.PdfService;
 import com.geisha.repository.UsuarioRepository;
 import com.geisha.security.UsuarioDetails;
+import com.geisha.service.DetalleTrabajoService;
 import com.geisha.service.PedidoService;
 import com.geisha.service.PersonaService;
 import com.geisha.service.TramiteService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -22,7 +27,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.swing.*;
+import java.awt.*;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -30,7 +40,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class PedidoController {
@@ -38,6 +50,7 @@ public class PedidoController {
     private final PedidoService pedidoService;
     private final PersonaService personaService;
     private final TramiteService tramiteService;
+    private final DetalleTrabajoService detalleTrabajoService;
     private final UsuarioRepository usuarioRepository;
     private final ObjectMapper objectMapper;
     private final PdfService pdfService;
@@ -163,6 +176,7 @@ public class PedidoController {
                           @RequestParam(required = false) List<Long> detalleTramiteId,
                           @RequestParam(required = false) List<BigDecimal> detallePrecio,
                           @RequestParam(required = false) List<String> detalleObservaciones,
+                          @RequestParam(required = false) List<String> detalleRuta,
                           @AuthenticationPrincipal UsuarioDetails usuarioDetails,
                           Model model,
                           RedirectAttributes redirectAttributes) {
@@ -216,7 +230,7 @@ public class PedidoController {
         }
 
         if(!errores.isEmpty()){
-            return volverAlFormularioConError(pedido, detalleTramiteId, detallePrecio, detalleObservaciones, errores, model);
+            return volverAlFormularioConError(pedido, detalleTramiteId, detallePrecio, detalleObservaciones, detalleRuta, errores, model);
         }
 
         List<DetalleTrabajo> detalles = new ArrayList<>();
@@ -228,15 +242,21 @@ public class PedidoController {
 
             BigDecimal precio = detallePrecio.get(i);
 
-            // observaciones es opcional, si no se envia nada o la fila no tiene texto, queda null
+            // observaciones y ruta son opcionales: si no se envia nada o
+            // la fila no tiene texto, quedan en null
             String observaciones = (detalleObservaciones != null && detalleObservaciones.size() > i)
                     ? detalleObservaciones.get(i)
+                    : null;
+
+            String ruta = (detalleRuta != null && detalleRuta.size() > i)
+                    ? detalleRuta.get(i)
                     : null;
 
             DetalleTrabajo detalle = DetalleTrabajo.builder()
                     .tramite(tramite)
                     .precioServicio(precio)
                     .observaciones((observaciones == null || observaciones.isBlank()) ? null : observaciones)
+                    .ruta((ruta == null || ruta.isBlank()) ? null : ruta.trim())
                     .pedido(pedido)
                     .build();
             detalles.add(detalle);
@@ -279,6 +299,7 @@ public class PedidoController {
                                               List<Long> detalleTramiteId,
                                               List<BigDecimal> detallePrecio,
                                               List<String> detalleObservaciones,
+                                              List<String> detalleRuta,
                                               List<String> errores,
                                               Model model) {
 
@@ -305,6 +326,7 @@ public class PedidoController {
                         .tramite(tramite)
                         .precioServicio((detallePrecio != null && detallePrecio.size() > i) ? detallePrecio.get(i) : null)
                         .observaciones((detalleObservaciones != null && detalleObservaciones.size() > i) ? detalleObservaciones.get(i) : null)
+                        .ruta((detalleRuta != null && detalleRuta.size() > i) ? detalleRuta.get(i) : null)
                         .build();
 
                 detalles.add(detalle);
@@ -357,10 +379,12 @@ public class PedidoController {
         List<Map<String, Object>> trabajos = pedido.getDetalles().stream()
                 .map(detalle -> {
                     Map<String, Object> item = new LinkedHashMap<>();
+                    item.put("id", detalle.getId());
                     item.put("tramite", detalle.getTramite().getNombre());
                     item.put("institucion", detalle.getTramite().getInstitucion().getNombre());
                     item.put("precio", detalle.getPrecioServicio());
                     item.put("observaciones", detalle.getObservaciones());
+                    item.put("tieneImagen", detalle.getRuta() != null && !detalle.getRuta().isBlank());
                     return item;
                 })
                 .toList();
@@ -479,5 +503,98 @@ public class PedidoController {
         );
 
         return "redirect:/pedidos";
+    }
+
+    /*
+     * Abre el explorador de archivos NATIVO de Windows (un JFileChooser
+     * de Swing) para elegir la imagen del trabajo terminado, y devuelve
+     * la ruta absoluta elegida como texto para autocompletar el campo
+     * del formulario.
+     *
+     * IMPORTANTE: esta ventana se abre en el escritorio del equipo
+     * donde corre el SERVIDOR, no en la computadora de quien hizo clic
+     * (los navegadores, por seguridad, nunca entregan la ruta real de
+     * un archivo). Tiene sentido en este proyecto porque el estudio usa
+     * la app desde la misma PC que la ejecuta; no funcionaria como se
+     * espera si el servidor se accede en red desde otra computadora, y
+     * tampoco funciona corriendo dentro de Docker (no tiene escritorio).
+     */
+    @GetMapping("/pedidos/seleccionar-archivo")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> seleccionarArchivo() {
+
+        AtomicReference<String> rutaElegida = new AtomicReference<>(null);
+
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+
+                JFrame ventanaTemporal = new JFrame();
+                ventanaTemporal.setAlwaysOnTop(true);
+                ventanaTemporal.toFront();
+
+                JFileChooser selector = new JFileChooser();
+                selector.setDialogTitle("Selecciona la imagen del trabajo realizado");
+                selector.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                selector.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+                        "Imágenes", "jpg", "jpeg", "png", "webp", "gif", "bmp"));
+
+                int resultado = selector.showOpenDialog(ventanaTemporal);
+
+                if (resultado == JFileChooser.APPROVE_OPTION) {
+                    rutaElegida.set(selector.getSelectedFile().getAbsolutePath());
+                }
+
+                ventanaTemporal.dispose();
+            });
+        } catch (Exception e) {
+            log.warn("No se pudo abrir el explorador de archivos nativo: {}", e.getMessage());
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("error", "No se pudo abrir el explorador de archivos en este equipo. " +
+                            "Puedes escribir o pegar la ruta manualmente en el campo."));
+        }
+
+        // rutaElegida queda en null si el usuario cerro el dialogo sin
+        // elegir nada (boton "Cancelar"); el frontend simplemente no
+        // completa el campo en ese caso
+        Map<String, String> respuesta = new LinkedHashMap<>();
+        respuesta.put("ruta", rutaElegida.get());
+        return ResponseEntity.ok(respuesta);
+    }
+
+    /*
+     * Sirve la imagen del trabajo realizado leyendola directamente desde
+     * la ruta guardada en detalle_trabajo.ruta. No se usa un recurso
+     * estatico de carpeta fija (como con las fotos de cliente) porque
+     * aqui la ruta puede apuntar a CUALQUIER lugar del disco elegido por
+     * el usuario, no a una carpeta predefinida.
+     */
+    @GetMapping("/detalle-trabajo/{id}/imagen")
+    public ResponseEntity<FileSystemResource> verImagenTrabajo(@PathVariable Long id) {
+
+        DetalleTrabajo detalle = detalleTrabajoService.buscarPorId(id)
+                .orElseThrow(() -> new RuntimeException("Trabajo no encontrado"));
+
+        String ruta = detalle.getRuta();
+        if (ruta == null || ruta.isBlank()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Path archivo = Path.of(ruta);
+        if (!Files.exists(archivo) || !Files.isRegularFile(archivo)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        MediaType tipoContenido;
+        try {
+            String tipoDetectado = Files.probeContentType(archivo);
+            tipoContenido = tipoDetectado != null ? MediaType.parseMediaType(tipoDetectado) : MediaType.APPLICATION_OCTET_STREAM;
+        } catch (IOException e) {
+            tipoContenido = MediaType.APPLICATION_OCTET_STREAM;
+        }
+
+        return ResponseEntity.ok()
+                .contentType(tipoContenido)
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(new FileSystemResource(archivo));
     }
 }

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="modalFotoTrabajo"
+     id="modalFotoTrabajo"
+     class="modal-overlay">
+
+    <div class="modal-card modal-foto">
+
+        <!-- encabezado -->
+        <div class="modal-foto-header">
+            <div class="modal-titulos">
+                <h2>
+                    <i class="bi bi-image"></i>
+                    Trabajo realizado
+                </h2>
+
+                <p id="fotoTrabajoSubtitulo">
+                    Trámite
+                </p>
+            </div>
+
+            <button type="button"
+                    id="btnCerrarFotoTrabajoSup"
+                    class="btn-icon">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="modal-foto-body">
+
+            <img id="fotoTrabajoImagen"
+                 src=""
+                 alt="Imagen del trabajo realizado"
+                 class="foto-cliente-preview"
+                 onerror="mostrarErrorFotoTrabajo()">
+
+            <!-- se muestra si la imagen ya no se puede cargar (el archivo
+                 se movio, se borro, o esta en un disco que ya no esta
+                 conectado a este equipo) -->
+            <div id="fotoTrabajoError" style="display: none;">
+                <img src="/img/sinContenido.jpg"
+                     alt="No se pudo cargar la imagen"
+                     class="foto-empty-image">
+                <h3>
+                    No se pudo cargar esta imagen. Puede que el archivo se haya movido, renombrado o eliminado.
+                </h3>
+            </div>
+
+        </div>
+
+        <!-- botones -->
+        <div class="modal-buttons">
+            <button id="btnCerrarFotoTrabajo"
+                    class="btn btn-secondary">
+                <i class="bi bi-x-circle"></i>
+                Cerrar
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+</html>

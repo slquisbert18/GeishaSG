@@ -132,6 +132,7 @@
                     <span>Trámite</span>
                     <span>Precio (Bs.)</span>
                     <span>Observaciones</span>
+                    <span>Trabajo final</span>
                     <span></span>
                 </div>
 
@@ -173,6 +174,19 @@
                                 placeholder="Opcional"
                                 th:value="${detalle.observaciones}">
 
+                        <div class="input-with-button">
+                            <input
+                                    type="text"
+                                    class="form-control ruta-input"
+                                    name="detalleRuta"
+                                    placeholder="Ruta del archivo..."
+                                    th:value="${detalle.ruta}">
+
+                            <button type="button" class="btn btn-secondary btn-examinar-ruta" title="Examinar...">
+                                <i class="bi bi-folder2-open"></i>
+                            </button>
+                        </div>
+
                         <button type="button" class="btn btn-icon btn-eliminar-fila" title="Quitar trabajo">
                             <i class="bi bi-trash"></i>
                         </button>
@@ -211,6 +225,18 @@
                                 class="form-control obs-input"
                                 name="detalleObservaciones"
                                 placeholder="Opcional">
+
+                        <div class="input-with-button">
+                            <input
+                                    type="text"
+                                    class="form-control ruta-input"
+                                    name="detalleRuta"
+                                    placeholder="Ruta del archivo...">
+
+                            <button type="button" class="btn btn-secondary btn-examinar-ruta" title="Examinar...">
+                                <i class="bi bi-folder2-open"></i>
+                            </button>
+                        </div>
 
                         <button type="button" class="btn btn-icon btn-eliminar-fila" title="Quitar trabajo">
                             <i class="bi bi-trash"></i>
