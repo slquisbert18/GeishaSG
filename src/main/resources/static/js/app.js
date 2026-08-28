@@ -728,10 +728,16 @@ if (modalFotoTrabajo && pedidoTrabajosLista) {
     const fotoTrabajoSubtitulo = document.getElementById("fotoTrabajoSubtitulo");
     const fotoTrabajoImagen = document.getElementById("fotoTrabajoImagen");
     const fotoTrabajoError = document.getElementById("fotoTrabajoError");
+    const btnAbrirUbicacionTrabajo = document.getElementById("btnAbrirUbicacionTrabajo");
     const btnCerrarFotoTrabajo = document.getElementById("btnCerrarFotoTrabajo");
     const btnCerrarFotoTrabajoSup = document.getElementById("btnCerrarFotoTrabajoSup");
 
+    // se recuerda el id del trabajo abierto actualmente, para saber a
+    // cual pertenece la imagen cuando se pide "abrir ubicacion"
+    let trabajoFotoActualId = null;
+
     function abrirModalFotoTrabajo(detalleTrabajoId, nombreTramite) {
+        trabajoFotoActualId = detalleTrabajoId;
         fotoTrabajoSubtitulo.textContent = nombreTramite;
         fotoTrabajoError.style.display = "none";
         fotoTrabajoImagen.style.display = "";
@@ -745,6 +751,7 @@ if (modalFotoTrabajo && pedidoTrabajosLista) {
     function cerrarModalFotoTrabajo() {
         modalFotoTrabajo.classList.remove("show");
         fotoTrabajoImagen.src = "";
+        trabajoFotoActualId = null;
     }
 
     // se define en el scope global porque el atributo onerror="" del
@@ -756,6 +763,35 @@ if (modalFotoTrabajo && pedidoTrabajosLista) {
 
     btnCerrarFotoTrabajo.onclick = cerrarModalFotoTrabajo;
     btnCerrarFotoTrabajoSup.onclick = cerrarModalFotoTrabajo;
+
+    btnAbrirUbicacionTrabajo.addEventListener("click", async () => {
+
+        if (!trabajoFotoActualId) return;
+
+        try {
+            const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+            const respuesta = await fetch("/detalle-trabajo/" + trabajoFotoActualId + "/ubicacion", {
+                method: "POST",
+                headers: {
+                    [csrfHeader]: csrfToken
+                }
+            });
+
+            if (!respuesta.ok) {
+                const datos = await respuesta.json().catch(() => ({}));
+                mostrarError(datos.mensaje || "No se pudo abrir la ubicación del archivo");
+                return;
+            }
+
+            // la ventana del explorador se abre en el equipo donde corre
+            // el servidor; aqui no hay nada mas que mostrar en pantalla
+        } catch (error) {
+            console.error(error);
+            mostrarError("No se pudo abrir la ubicación del archivo");
+        }
+    });
 
     // delegacion de eventos: la lista de trabajos se redibuja cada vez
     // que se abre el modal de detalle, asi que no tiene caso enganchar

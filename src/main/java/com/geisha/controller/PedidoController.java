@@ -14,6 +14,7 @@ import com.geisha.service.DetalleTrabajoService;
 import com.geisha.service.PedidoService;
 import com.geisha.service.PersonaService;
 import com.geisha.service.TramiteService;
+import com.geisha.util.ExploradorArchivos;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.FileSystemResource;
@@ -547,7 +548,8 @@ public class PedidoController {
                 ventanaTemporal.dispose();
             });
         } catch (Exception e) {
-            log.warn("No se pudo abrir el explorador de archivos nativo: {}", e.getMessage());
+            Throwable causaReal = (e.getCause() != null) ? e.getCause() : e;
+            log.warn("No se pudo abrir el explorador de archivos nativo", causaReal);
             return ResponseEntity.internalServerError()
                     .body(Map.of("error", "No se pudo abrir el explorador de archivos en este equipo. " +
                             "Puedes escribir o pegar la ruta manualmente en el campo."));
@@ -596,5 +598,39 @@ public class PedidoController {
                 .contentType(tipoContenido)
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .body(new FileSystemResource(archivo));
+    }
+
+    /*
+     * Abre el explorador de archivos señalando la imagen del trabajo
+     * realizado. Mismo aviso que en /pedidos/seleccionar-archivo: abre
+     * la ventana en el equipo donde corre el SERVIDOR.
+     */
+    @PostMapping("/detalle-trabajo/{id}/ubicacion")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> abrirUbicacionTrabajo(@PathVariable Long id) {
+
+        DetalleTrabajo detalle = detalleTrabajoService.buscarPorId(id)
+                .orElseThrow(() -> new RuntimeException("Trabajo no encontrado"));
+
+        String ruta = detalle.getRuta();
+        if (ruta == null || ruta.isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("mensaje", "Este trabajo todavía no tiene una imagen cargada"));
+        }
+
+        Path archivo = Path.of(ruta);
+        if (!Files.exists(archivo)) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("mensaje", "El archivo ya no existe en esa ruta"));
+        }
+
+        try {
+            ExploradorArchivos.abrirSeleccionando(archivo);
+            return ResponseEntity.ok().build();
+        } catch (IOException e) {
+            log.warn("No se pudo abrir el explorador de archivos para el trabajo {}", id, e);
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("mensaje", "No se pudo abrir el explorador de archivos en este equipo"));
+        }
     }
 }
