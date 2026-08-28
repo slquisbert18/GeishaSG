@@ -24,11 +24,11 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
         SELECT p
         FROM Pedido p
         JOIN p.cliente c
-        WHERE (:fechaInicio IS NULL OR p.fechaRegistro >= :fechaInicio)
-          AND (:fechaFin IS NULL OR p.fechaRegistro < :fechaFin)
+        WHERE (CAST(:fechaInicio AS timestamp) IS NULL OR p.fechaRegistro >= :fechaInicio)
+          AND (CAST(:fechaFin AS timestamp) IS NULL OR p.fechaRegistro < :fechaFin)
           AND (:buscar IS NULL
-               OR LOWER(c.nombres) LIKE LOWER(CONCAT('%', :buscar, '%'))
-               OR LOWER(c.apellidos) LIKE LOWER(CONCAT('%', :buscar, '%')))
+               OR LOWER(c.nombres) LIKE LOWER(CONCAT('%', CAST(:buscar AS string), '%'))
+               OR LOWER(c.apellidos) LIKE LOWER(CONCAT('%', CAST(:buscar AS string), '%')))
         ORDER BY p.fechaRegistro DESC
         """)
     List<Pedido> filtrar(
